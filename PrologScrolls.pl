@@ -1,6 +1,7 @@
 :- style_check(-singleton).
 :- dynamic current_node_is/1, equipped/2, located/2, health/2, defense/2, attack/2, magic_attack/2, magic_defense/2, prev_node/1, status/2,
-    king_status/2, gold/1, potion_count/2, interactable/2, experience/1, level/1.
+  king_status/2, gold/1, potion_count/2, interactable/2, experience/1, level/1, current_character/1, game_begin/0.
+
 
 /*
 To play the game load this file in SWI-Prolog (or any equivalent)
@@ -9,6 +10,82 @@ and then type 'play.'
 
 different(X, X) :- !, fail.
 different(X, Y).
+/*
+Create player's character.
+*/
+
+argonian :- create_character(argonian), set_current_character(argonian).
+khajiit :- create_character(khajiit), set_current_character(khajiit).
+kinko :- create_character(kinko), set_current_character(kinko).
+
+set_current_character(Character) :-
+    retractall(current_character(_)),
+    assert(current_character(Character)).
+
+get_current_character(Character) :-
+    current_character(Character).
+
+create_character(Race) :- 
+    get_current_character(Character),
+    write('You have already created your character!'), nl,
+    write('You are currently a '), write(Character), nl.
+
+create_character(Race) :-
+    current_node_is(home),
+    (Race = argonian ->
+        assert(health(player, 50)),
+        assert(defense(player, 1)),
+        assert(attack(player, 1)),
+        assert(magic_attack(player, 1)),
+        assert(magic_defense(player, 1)),
+        assert(status(player, alive)),
+        write('Argonian character created successfully!'), nl;
+    Race = khajiit ->
+        assert(health(player, 50)),
+        assert(defense(player, 1)),
+        assert(attack(player, 1)),
+        assert(magic_attack(player, 1)),
+        assert(magic_defense(player, 1)),
+        assert(status(player, alive)),
+        write('Khajiit character created successfully!'), nl;
+    Race = kinko ->
+        assert(health(player, 50)),
+        assert(defense(player, 1)),
+        assert(attack(player, 1)),
+        assert(magic_attack(player, 1)),
+        assert(magic_defense(player, 1)),
+        assert(status(player, alive)),
+        write('Kinko character created successfully!'), nl;
+    write('Invalid race!'), nl), description(home).
+
+/*
+create_character(argonian) :-
+    assert(health(player, 50)),
+    assert(defense(player, 1)),
+    assert(attack(player, 1)),
+    assert(magic_attack(player, 1)),
+    assert(magic_defense(player, 1)),
+    assert(status(player, alive)),
+    write('Argonian character created successfully!'), nl.
+
+create_character(khajiit) :-
+    assert(health(player, 50)),
+    assert(defense(player, 1)),
+    assert(attack(player, 1)),
+    assert(magic_attack(player, 1)),
+    assert(magic_defense(player, 1)),
+    assert(status(player, alive)),
+    write('Khajiit character created successfully!'), nl.
+
+create_character(kinko) :-
+    assert(health(player, 50)),
+    assert(defense(player, 1)),
+    assert(attack(player, 1)),
+    assert(magic_attack(player, 1)),
+    assert(magic_defense(player, 1)),
+    assert(status(player, alive)),
+    write('Kinko character created successfully!'), nl.
+*/
 
 /*
 The players equipment.
@@ -440,6 +517,35 @@ scene(X) :- current_node_is(X), description(X).
 
 look :- current_node_is(X), description(X), !.
 
+description(character):-
+    nl,
+    write("First of all you will receive a description of each character you can choose to be. There will be three characters you can choose from."),nl,
+    write("You can choose to be either Argonian(argonian), Khajiit(khajiit) or Kinko(kinko). "),nl,
+    write("Pay close attention to the character descriptions, their attributes may help you in different situations"),nl,
+    write("To choose a character type in their race. For example typing 'argonian.' would create your character as an argonian."),nl,nl,nl,
+   description(argonian),nl,
+   description(khajiit),nl,
+   description(kinko),nl,
+    read_character_option.
+
+description(argonian):-
+    write("Argonian: "),nl,
+    write("A reptilian humanoid race that inhabits the province of Black Marsh. "),nl,
+    write("They are well-known for their ability to breathe underwater, which allows them to traverse swamps, marshes and lakes with ease."),nl,
+    write("Their scaly skin and sharp claws give them a fearsome appearance, but they are also known for their shrewdness and adaptability."),nl.
+
+description(khajiit):-
+    write("Khajiit: "),nl,
+    write("A feline humanoid race that hail from the province of Elsweyr."),nl,
+    write("They possess excellent night vision, allowing them to see clearly in the dark and making them skilled hunters and thieves. "),nl,
+    write("Their fur-covered bodies and feline features make them appear both graceful and dangerous, and they have a reputation for being cunning and quick-witted. "),nl.
+
+description(kinko):-
+    write("Kinko: "),nl,
+    write("A humanoid race with bat-like wings that allow them to glide for short distances."),nl,
+    write("They are known for their agility and speed."),nl,
+    write("Their wings also grant them a degree of aerial mobility in combat and exploration. "),nl.
+
 description(home) :-
     equipped(head_slot, crown),
     nl,
@@ -598,14 +704,48 @@ description(boss) :-
 description(boss).
 
 /*
+Read character 
+*/
+read_character_option :-
+    write("Please enter your character choice: "), nl, 
+    read(Option),
+    (
+        Option == argonian ->
+            argonian,
+            nl
+        ;
+        Option == khajiit ->
+            khajiit,
+            nl
+        ;
+        Option == kinko ->
+            kinko,
+            nl
+        ;
+        write("Invalid character option. Please enter argonian, khajiit, or kinko."),
+        nl,
+        read_character_option
+    ).
+/*
 Starts the game.
 */
 
-play :- assert(current_node_is(home)), options.
+play :-
+    (   game_begin
+    ->  game_in_play
+    ;   assert(current_node_is(home)),
+        options,
+        assert(game_begin)
+    ).
 
+
+game_in_play :- 
+    nl,
+    write("Game has already started."), nl.
+    
 new :- 
     load_default_equipment, load_default_status, load_default_player_stats, load_default_locations,
-    tutorial, description(home).
+    tutorial, description(character).
 
 load :- load_game, retract(current_node_is(home)), !.
 
