@@ -1,6 +1,7 @@
 :- style_check(-singleton).
 :- dynamic current_node_is/1, equipped/2, located/2, health/2, defense/2, attack/2, magic_attack/2, magic_defense/2, prev_node/1, status/2,
-    king_status/2, gold/1, potion_count/2, interactable/2, current_character/1, game_begin/0.
+  king_status/2, gold/1, potion_count/2, interactable/2, experience/1, level/1, current_character/1, game_begin/0.
+
 
 /*
 To play the game load this file in SWI-Prolog (or any equivalent)
@@ -96,15 +97,60 @@ load_default_equipment :-
     assert(equipped(magic_slot, nothing)),
     assert(equipped(cape_slot, nothing)),
     assert(potion_count(health_potion, 0)),
+    assert(experience(0)),
     assert(gold(0)).
 
-add_gold(I):- gold(X), NG is X + I, assert(gold(NG)), retract(gold(X)), format(" gold increased to : ~w", [NG]), nl.
+add_gold(I) :- gold(X), NG is X + I, assert(gold(NG)), retract(gold(X)), format(" gold increased to : ~w", [NG]), nl.
+
+add_exp(I) :- experience(X), NG is X + I, assert(experience(NG)), retract(experience(X)), format(" you gained : ~w exp!", [NG]), nl.
+
+reset_stat(Stat) :-
+    level(L),
+    ( Stat = attack -> retract(attack(player, _)), assert(attack(player, L))
+    ; Stat = defense -> retract(defense(player, _)), assert(defense(player, L))
+    ; Stat = magic_attack -> retract(magic_attack(player, _)), assert(magic_attack(player, L))
+    ; Stat = magic_defense -> retract(magic_defense(player, _)), assert(magic_defense(player, L))).
+
+
+modify_stat(Stat, Modifier) :-
+    ( Stat = attack -> attack(player, OldValue), NewValue is OldValue + Modifier, retract(attack(player, OldValue)), assert(attack(player, NewValue))
+    ; Stat = defense -> defense(player, OldValue), NewValue is OldValue + Modifier, retract(defense(player, OldValue)), assert(defense(player, NewValue))
+    ; Stat = magic_attack -> magic_attack(player, OldValue), NewValue is OldValue + Modifier, retract(magic_attack(player, OldValue)), assert(magic_attack(player, NewValue))
+    ; Stat = magic_defense -> magic_defense(player, OldValue), NewValue is OldValue + Modifier, retract(magic_defense(player, OldValue)), assert(magic_defense(player, NewValue))).
+    
+
+increase_level :- 
+    level(X),
+    attack(player, A),
+    defense(player, D),
+    magic_attack(player, MA),
+    magic_defense(player, MD),
+    NL is X + 1,
+    NA is A + 1,
+    ND is D + 1,
+    NMA is MA + 1,
+    NMD is MD + 1,
+    retract(level(X)),
+    assert(level(NL)),
+
+    retract(attack(player, A)),
+    assert(attack(player, NA)),
+
+    retract(defense(player, D)),
+    assert(defense(player, ND)),
+
+    retract(magic_defense(player, MD)),
+    assert(magic_defense(player, NMD)),
+
+    retract(magic_attack(player, MA)),
+    assert(magic_attack(player, NMA)).
 
 /*
 stats for characters
 */
 
 load_default_player_stats :-
+    assert(level(1)),
     assert(health(player, 50)),
     assert(defense(player, 1)),
     assert(attack(player, 1)),
@@ -304,7 +350,7 @@ load_default_locations :-
 /*
 Initialize the stats of each item
 */
-item(short_sword, weapon_slot, attack(player, 3)).
+item(short_sword, weapon_slot, modify_attack(player, 3)).
 item(chainmail, armor_slot, defense(player, 3)).
 item(crown, head_slot, king_status(player, yes)).
 item(spellbook, magic_slot, magic_attack(player, 10)).
@@ -428,7 +474,9 @@ Describes the players gear.
 
 inspect(player) :-
     nl,
+    level(L),
     gold(G),
+    experience(E),
     potion_count(health_potion, P),
     equipped(head_slot, X),
     equipped(weapon_slot, Y),
@@ -440,13 +488,15 @@ inspect(player) :-
     attack(player, A),
     magic_attack(player, MA),
     magic_defense(player, MD),
+    format("Current level: ~w", [L]), nl,
     format("Head slot: ~w", [X]), nl,
     format("Armor slot: ~w", [Z]), nl,
     format("Cape slot: ~w", [C]), nl,
     format("Weapon slot: ~w", [Y]), nl,
     format("Magic slot: ~w", [M]), nl,
     format("You currently have ~2f HP, ~w Attack, ~w Defence, ~w Magic Attack and ~w Magic Defence.", [H, A, D, MA, MD]), nl,
-    format("You are carrying ~w gold coins and ~w health potion(s).", [G, P]), nl, !.
+    format("You are carrying ~w gold coins and ~w health potion(s).", [G, P]), nl,
+    format("You have ~w experience points.", [E]), nl, !.
 inspect(health_potion) :-
     potion_count(I, C),
     C > 0,
