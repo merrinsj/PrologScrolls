@@ -1,6 +1,6 @@
 :- style_check(-singleton).
 :- dynamic current_node_is/1, equipped/2, located/2, health/2, defense/2, attack/2, magic_attack/2, magic_defense/2, prev_node/1, status/2,
-    king_status/2, gold/1, potion_count/2, interactable/2, current_character/1.
+    king_status/2, gold/1, potion_count/2, interactable/2, current_character/1, game_begin/0.
 
 /*
 To play the game load this file in SWI-Prolog (or any equivalent)
@@ -680,8 +680,19 @@ read_character_option :-
 Starts the game.
 */
 
-play :- assert(current_node_is(home)), options.
+play :-
+    (   game_begin
+    ->  game_in_play
+    ;   assert(current_node_is(home)),
+        options,
+        assert(game_begin)
+    ).
 
+
+game_in_play :- 
+    nl,
+    write("Game has already started."), nl.
+    
 new :- 
     load_default_equipment, load_default_status, load_default_player_stats, load_default_locations,
     tutorial, description(character).
