@@ -24,6 +24,40 @@ set_current_character(Character) :-
 get_current_character(Character) :-
     current_character(Character).
 
+create_character(Race) :- 
+    get_current_character(Character),
+    write('You have already created your character!'), nl,
+    write('You are currently a '), write(Character), nl.
+
+create_character(Race) :-
+    current_node_is(home),
+    (Race = argonian ->
+        assert(health(player, 50)),
+        assert(defense(player, 1)),
+        assert(attack(player, 1)),
+        assert(magic_attack(player, 1)),
+        assert(magic_defense(player, 1)),
+        assert(status(player, alive)),
+        write('Argonian character created successfully!'), nl;
+    Race = khajiit ->
+        assert(health(player, 50)),
+        assert(defense(player, 1)),
+        assert(attack(player, 1)),
+        assert(magic_attack(player, 1)),
+        assert(magic_defense(player, 1)),
+        assert(status(player, alive)),
+        write('Khajiit character created successfully!'), nl;
+    Race = kinko ->
+        assert(health(player, 50)),
+        assert(defense(player, 1)),
+        assert(attack(player, 1)),
+        assert(magic_attack(player, 1)),
+        assert(magic_defense(player, 1)),
+        assert(status(player, alive)),
+        write('Kinko character created successfully!'), nl;
+    write('Invalid race!'), nl), description(home).
+
+/*
 create_character(argonian) :-
     assert(health(player, 50)),
     assert(defense(player, 1)),
@@ -50,6 +84,7 @@ create_character(kinko) :-
     assert(magic_defense(player, 1)),
     assert(status(player, alive)),
     write('Kinko character created successfully!'), nl.
+*/
 
 /*
 The players equipment.
@@ -432,6 +467,13 @@ scene(X) :- current_node_is(X), description(X).
 
 look :- current_node_is(X), description(X), !.
 
+description(character):-
+    nl,
+    write("First of all you will receive a description of each character you can choose to be. There will be three characters you can choose from."),nl,
+    write("You can choose to be either Argonian(argonian), Khajiit(khajiit) or Kinko(kinko). "),nl,
+    write("To choose a character type in their race. For example typing 'argonian.' would create your character as an argonian."),nl,
+    read_character_option.
+
 description(home) :-
     equipped(head_slot, crown),
     nl,
@@ -590,6 +632,32 @@ description(boss) :-
 description(boss).
 
 /*
+Read character 
+*/
+read_character_option :-
+    write("Please enter your character choice: "),
+    read(Option),
+    (
+        Option == argonian ->
+            argonian,
+            write("You have selected Argonian."),
+            nl
+        ;
+        Option == khajiit ->
+            khajiit,
+            write("You have selected Khajiit."),
+            nl
+        ;
+        Option == kinko ->
+            kinko,
+            write("You have selected Kinko."),
+            nl
+        ;
+        write("Invalid character option. Please enter argonian, khajiit, or kinko."),
+        nl,
+        read_character_option
+    ).
+/*
 Starts the game.
 */
 
@@ -597,7 +665,7 @@ play :- assert(current_node_is(home)), options.
 
 new :- 
     load_default_equipment, load_default_status, load_default_player_stats, load_default_locations,
-    tutorial, description(home).
+    tutorial, description(character).
 
 load :- load_game, retract(current_node_is(home)), !.
 
