@@ -1,6 +1,6 @@
 :- style_check(-singleton).
 :- dynamic current_node_is/1, equipped/2, located/2, health/2, defense/2, attack/2, magic_attack/2, magic_defense/2, prev_node/1, status/2,
-    king_status/2, gold/1, potion_count/2, interactable/2.
+    king_status/2, gold/1, potion_count/2, interactable/2, current_character/1.
 
 /*
 To play the game load this file in SWI-Prolog (or any equivalent)
@@ -9,6 +9,47 @@ and then type 'play.'
 
 different(X, X) :- !, fail.
 different(X, Y).
+/*
+Create player's character.
+*/
+
+argonian :- create_character(argonian), set_current_character(argonian).
+khajiit :- create_character(khajiit), set_current_character(khajiit).
+kinko :- create_character(kinko), set_current_character(kinko).
+
+set_current_character(Character) :-
+    retractall(current_character(_)),
+    assert(current_character(Character)).
+
+get_current_character(Character) :-
+    current_character(Character).
+
+create_character(argonian) :-
+    assert(health(player, 50)),
+    assert(defense(player, 1)),
+    assert(attack(player, 1)),
+    assert(magic_attack(player, 1)),
+    assert(magic_defense(player, 1)),
+    assert(status(player, alive)),
+    write('Argonian character created successfully!'), nl.
+
+create_character(khajiit) :-
+    assert(health(player, 50)),
+    assert(defense(player, 1)),
+    assert(attack(player, 1)),
+    assert(magic_attack(player, 1)),
+    assert(magic_defense(player, 1)),
+    assert(status(player, alive)),
+    write('Khajiit character created successfully!'), nl.
+
+create_character(kinko) :-
+    assert(health(player, 50)),
+    assert(defense(player, 1)),
+    assert(attack(player, 1)),
+    assert(magic_attack(player, 1)),
+    assert(magic_defense(player, 1)),
+    assert(status(player, alive)),
+    write('Kinko character created successfully!'), nl.
 
 /*
 The players equipment.
