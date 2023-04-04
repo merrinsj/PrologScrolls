@@ -471,8 +471,30 @@ description(character):-
     nl,
     write("First of all you will receive a description of each character you can choose to be. There will be three characters you can choose from."),nl,
     write("You can choose to be either Argonian(argonian), Khajiit(khajiit) or Kinko(kinko). "),nl,
-    write("To choose a character type in their race. For example typing 'argonian.' would create your character as an argonian."),nl,
+    write("Pay close attention to the character descriptions, their attributes may help you in different situations"),nl,
+    write("To choose a character type in their race. For example typing 'argonian.' would create your character as an argonian."),nl,nl,nl,
+   description(argonian),nl,
+   description(khajiit),nl,
+   description(kinko),nl,
     read_character_option.
+
+description(argonian):-
+    write("Argonian: "),nl,
+    write("A reptilian humanoid race that inhabits the province of Black Marsh. "),nl,
+    write("They are well-known for their ability to breathe underwater, which allows them to traverse swamps, marshes and lakes with ease."),nl,
+    write("Their scaly skin and sharp claws give them a fearsome appearance, but they are also known for their shrewdness and adaptability."),nl.
+
+description(khajiit):-
+    write("Khajiit: "),nl,
+    write("A feline humanoid race that hail from the province of Elsweyr."),nl,
+    write("They possess excellent night vision, allowing them to see clearly in the dark and making them skilled hunters and thieves. "),nl,
+    write("Their fur-covered bodies and feline features make them appear both graceful and dangerous, and they have a reputation for being cunning and quick-witted. "),nl.
+
+description(kinko):-
+    write("Kinko: "),nl,
+    write("A humanoid race with bat-like wings that allow them to glide for short distances."),nl,
+    write("They are known for their agility and speed."),nl,
+    write("Their wings also grant them a degree of aerial mobility in combat and exploration. "),nl.
 
 description(home) :-
     equipped(head_slot, crown),
@@ -635,22 +657,19 @@ description(boss).
 Read character 
 */
 read_character_option :-
-    write("Please enter your character choice: "),
+    write("Please enter your character choice: "), nl, 
     read(Option),
     (
         Option == argonian ->
             argonian,
-            write("You have selected Argonian."),
             nl
         ;
         Option == khajiit ->
             khajiit,
-            write("You have selected Khajiit."),
             nl
         ;
         Option == kinko ->
             kinko,
-            write("You have selected Kinko."),
             nl
         ;
         write("Invalid character option. Please enter argonian, khajiit, or kinko."),
