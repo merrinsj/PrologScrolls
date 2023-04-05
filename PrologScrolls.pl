@@ -10,6 +10,7 @@ and then type 'play.'
 
 different(X, X) :- !, fail.
 different(X, Y).
+
 /*
 Create player's character.
 */
@@ -33,59 +34,30 @@ create_character(Race) :-
 create_character(Race) :-
     current_node_is(home),
     (Race = argonian ->
+        assert(level(1)),
         assert(health(player, 50)),
         assert(defense(player, 1)),
         assert(attack(player, 1)),
         assert(magic_attack(player, 1)),
         assert(magic_defense(player, 1)),
-        assert(status(player, alive)),
         write('Argonian character created successfully!'), nl;
     Race = khajiit ->
+        assert(level(1)),
         assert(health(player, 50)),
         assert(defense(player, 1)),
         assert(attack(player, 1)),
         assert(magic_attack(player, 1)),
         assert(magic_defense(player, 1)),
-        assert(status(player, alive)),
         write('Khajiit character created successfully!'), nl;
     Race = kinko ->
+        assert(level(1)),
         assert(health(player, 50)),
         assert(defense(player, 1)),
         assert(attack(player, 1)),
         assert(magic_attack(player, 1)),
         assert(magic_defense(player, 1)),
-        assert(status(player, alive)),
         write('Kinko character created successfully!'), nl;
     write('Invalid race!'), nl), description(home).
-
-/*
-create_character(argonian) :-
-    assert(health(player, 50)),
-    assert(defense(player, 1)),
-    assert(attack(player, 1)),
-    assert(magic_attack(player, 1)),
-    assert(magic_defense(player, 1)),
-    assert(status(player, alive)),
-    write('Argonian character created successfully!'), nl.
-
-create_character(khajiit) :-
-    assert(health(player, 50)),
-    assert(defense(player, 1)),
-    assert(attack(player, 1)),
-    assert(magic_attack(player, 1)),
-    assert(magic_defense(player, 1)),
-    assert(status(player, alive)),
-    write('Khajiit character created successfully!'), nl.
-
-create_character(kinko) :-
-    assert(health(player, 50)),
-    assert(defense(player, 1)),
-    assert(attack(player, 1)),
-    assert(magic_attack(player, 1)),
-    assert(magic_defense(player, 1)),
-    assert(status(player, alive)),
-    write('Kinko character created successfully!'), nl.
-*/
 
 /*
 The players equipment.
@@ -111,13 +83,13 @@ reset_stat(Stat) :-
     ; Stat = magic_attack -> retract(magic_attack(player, _)), assert(magic_attack(player, L))
     ; Stat = magic_defense -> retract(magic_defense(player, _)), assert(magic_defense(player, L))).
 
-
 modify_stat(Stat, Modifier) :-
     ( Stat = attack -> attack(player, OldValue), NewValue is OldValue + Modifier, retract(attack(player, OldValue)), assert(attack(player, NewValue))
     ; Stat = defense -> defense(player, OldValue), NewValue is OldValue + Modifier, retract(defense(player, OldValue)), assert(defense(player, NewValue))
     ; Stat = magic_attack -> magic_attack(player, OldValue), NewValue is OldValue + Modifier, retract(magic_attack(player, OldValue)), assert(magic_attack(player, NewValue))
-    ; Stat = magic_defense -> magic_defense(player, OldValue), NewValue is OldValue + Modifier, retract(magic_defense(player, OldValue)), assert(magic_defense(player, NewValue))).
-    
+    ; Stat = magic_defense -> magic_defense(player, OldValue), NewValue is OldValue + Modifier, retract(magic_defense(player, OldValue)), assert(magic_defense(player, NewValue))
+    ).
+
 
 increase_level :- 
     level(X),
@@ -148,14 +120,6 @@ increase_level :-
 /*
 stats for characters
 */
-
-load_default_player_stats :-
-    assert(level(1)),
-    assert(health(player, 50)),
-    assert(defense(player, 1)),
-    assert(attack(player, 1)),
-    assert(magic_attack(player, 1)),
-    assert(magic_defense(player, 1)).
 
 %king_status(player, no).
 health(slime, 15).
@@ -350,7 +314,7 @@ load_default_locations :-
 /*
 Initialize the stats of each item
 */
-item(short_sword, weapon_slot, modify_attack(player, 3)).
+item(short_sword, weapon_slot, attack(player, 3)).
 item(chainmail, armor_slot, defense(player, 3)).
 item(crown, head_slot, king_status(player, yes)).
 item(spellbook, magic_slot, magic_attack(player, 10)).
@@ -469,6 +433,20 @@ add_potion(I):- item(I, potion, N), potion_count(I, C), NC is C + N, assert(poti
 , write(I), format(" count increased to : ~w", [NC]), !.
 
 /*
+extract_stat(Item, Stat, Modifier) :-
+    functor(Item, _, Arity),
+    Arity =:= 3,
+    arg(3, Item, StatMod),
+    functor(StatMod, Stat, 1),
+    arg(1, StatMod, player),
+    arg(2, StatMod, Modifier).
+*/
+
+extract_stat(Item, Stat, Modifier) :-
+    Item =.. [_, _, _, StatTerm],
+    StatTerm =.. [Stat, player, Modifier].
+
+/*
 Describes the players gear.
 */
 
@@ -488,7 +466,9 @@ inspect(player) :-
     attack(player, A),
     magic_attack(player, MA),
     magic_defense(player, MD),
+    get_current_character(Character),
     format("Current level: ~w", [L]), nl,
+    format("Current Character: ~w", [Character]),nl,
     format("Head slot: ~w", [X]), nl,
     format("Armor slot: ~w", [Z]), nl,
     format("Cape slot: ~w", [C]), nl,
@@ -744,14 +724,14 @@ game_in_play :-
     write("Game has already started."), nl.
     
 new :- 
-    load_default_equipment, load_default_status, load_default_player_stats, load_default_locations,
+    load_default_equipment, load_default_status, load_default_locations,
     tutorial, description(character).
 
 load :- load_game, retract(current_node_is(home)), !.
 
 options :-
     nl,
-    write("Welcome to - The Legend of Lelda: Zink's Awakening!"), nl,
+    write("Welcome to - PrologScrolls!"), nl,
     write("To begin you can either start a new game by typing 'new.'"), nl,
     write("Or you can load a previous save by typing 'load.'"), nl, !.
 
