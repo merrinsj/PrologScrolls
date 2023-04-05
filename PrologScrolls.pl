@@ -312,9 +312,7 @@ load_default_locations :-
 % add health potions to shop or somewhere else
 
 
-equip_item(Stat, Modifier) :-
-    reset_stat(Stat),
-    modify_stat(Stat, Modifier).
+
 
 
 /*
@@ -322,6 +320,11 @@ Initialize the stats of each item
 */
 
 item(short_sword, weapon_slot, equip_item(attack, 3)).
+
+equip_item(Stat, Modifier) :-
+    write("made it here"),
+    reset_stat(Stat),
+    modify_stat(Stat, Modifier).
 
 item(chainmail, armor_slot, defense(player, 3)).
 item(crown, head_slot, king_status(player, yes)).
@@ -403,11 +406,13 @@ take(I1) :-
     , nl, !.
 take(I1) :- 
     located(I1, X), current_node_is(X), item(I1, Y, S), equipped(Y, I2), different(X, shop), different(item(I1, Y, S), item(_,potion,_)),
-    assert(located(I1, Y)), assert(equipped(Y, I1)), retract(located(I1, X)), retract(equipped(Y, I2)), item_event(I1, S)
-    , nl, !.
+    assert(located(I1, Y)), assert(equipped(Y, I1)), retract(located(I1, X)), retract(equipped(Y, I2)),extract_stat(S, Stat, Modifier),
+    equip_item(Stat, Modifier), nl, !.
 take(I1):- located(I1, X), current_node_is(X), item(I1, potion, S), add_potion(I1), retract(located(I1, X)), !.
 take(_) :- write("Unable to acquire that item."), !.
 
+
+extract_stat(equip_item(Stat, Modifier), Stat, Modifier).
 /*
 Item purchasing.
 */
@@ -429,37 +434,26 @@ buy(quality_cloak) :- write("You don't have enough gold!"), nl, fail.
 /*
 item events
 */
-
-%item_event(I, S):- functor(S, F, N), OldStat =.. [F, player, B] , assert(S), retract(OldStat),
- %nl, format("Item Aqquired: ~w", [I]), nl
+/*
+item_event(I, S):- functor(S, F, N), OldStat =.. [F, player, B] , assert(S), retract(OldStat),
+ nl, format("Item Aqquired: ~w", [I]), nl
 %, format("Old stat: ~w", [OldStat]), nl ,
 % format("new stat: ~w", [S]), !.
+*/
 
  item_event(I, S):- 
     functor(S, name, N),
     arg(1, S, Stat),
     assert(S),
+    write('S is: '), write(S), nl,
     nl, format("Item Aqquired: ~w", [I]), nl,
-     format("~w increased by ~w", [Stat, N]), !.
+    format("~w increased by ~w", [Stat, N]), !.
 
 item_event(_, _) :- !.
 
 add_potion(I):- item(I, potion, N), potion_count(I, C), NC is C + N, assert(potion_count(I, NC)), retract(potion_count(I, C)), nl
 , write(I), format(" count increased to : ~w", [NC]), !.
 
-/*
-extract_stat(Item, Stat, Modifier) :-
-    functor(Item, _, Arity),
-    Arity =:= 3,
-    arg(3, Item, StatMod),
-    functor(StatMod, Stat, 1),
-    arg(1, StatMod, player),
-    arg(2, StatMod, Modifier).
-*/
-
-extract_stat(Item, Stat, Modifier) :-
-    Item =.. [_, _, _, StatTerm],
-    StatTerm =.. [Stat, player, Modifier].
 
 /*
 Describes the players gear.
