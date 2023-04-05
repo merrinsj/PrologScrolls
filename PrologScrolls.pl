@@ -33,28 +33,28 @@ create_character(Race) :-
 create_character(Race) :-
     current_node_is(home),
     (Race = argonian ->
+        assert(level(1)),
         assert(health(player, 50)),
         assert(defense(player, 1)),
         assert(attack(player, 1)),
         assert(magic_attack(player, 1)),
         assert(magic_defense(player, 1)),
-        assert(status(player, alive)),
         write('Argonian character created successfully!'), nl;
     Race = khajiit ->
+        assert(level(1)),
         assert(health(player, 50)),
         assert(defense(player, 1)),
         assert(attack(player, 1)),
         assert(magic_attack(player, 1)),
         assert(magic_defense(player, 1)),
-        assert(status(player, alive)),
         write('Khajiit character created successfully!'), nl;
     Race = kinko ->
+        assert(level(1)),
         assert(health(player, 50)),
         assert(defense(player, 1)),
         assert(attack(player, 1)),
         assert(magic_attack(player, 1)),
         assert(magic_defense(player, 1)),
-        assert(status(player, alive)),
         write('Kinko character created successfully!'), nl;
     write('Invalid race!'), nl), description(home).
 
@@ -111,13 +111,20 @@ reset_stat(Stat) :-
     ; Stat = magic_attack -> retract(magic_attack(player, _)), assert(magic_attack(player, L))
     ; Stat = magic_defense -> retract(magic_defense(player, _)), assert(magic_defense(player, L))).
 
+modify_stat(Stat, Modifier) :-
+    ( Stat = attack -> attack(player, OldValue), NewValue is OldValue + Modifier, retract(attack(player, OldValue)), assert(attack(player, NewValue))
+    ; Stat = defense -> defense(player, OldValue), NewValue is OldValue + Modifier, retract(defense(player, OldValue)), assert(defense(player, NewValue))
+    ; Stat = magic_attack -> magic_attack(player, OldValue), NewValue is OldValue + Modifier, retract(magic_attack(player, OldValue)), assert(magic_attack(player, NewValue))
+    ; Stat = magic_defense -> magic_defense(player, OldValue), NewValue is OldValue + Modifier, retract(magic_defense(player, OldValue)), assert(magic_defense(player, NewValue))
+    ).
 
+/*
 modify_stat(Stat, Modifier) :-
     ( Stat = attack -> attack(player, OldValue), NewValue is OldValue + Modifier, retract(attack(player, OldValue)), assert(attack(player, NewValue))
     ; Stat = defense -> defense(player, OldValue), NewValue is OldValue + Modifier, retract(defense(player, OldValue)), assert(defense(player, NewValue))
     ; Stat = magic_attack -> magic_attack(player, OldValue), NewValue is OldValue + Modifier, retract(magic_attack(player, OldValue)), assert(magic_attack(player, NewValue))
     ; Stat = magic_defense -> magic_defense(player, OldValue), NewValue is OldValue + Modifier, retract(magic_defense(player, OldValue)), assert(magic_defense(player, NewValue))).
-    
+*/  
 
 increase_level :- 
     level(X),
@@ -350,7 +357,7 @@ load_default_locations :-
 /*
 Initialize the stats of each item
 */
-item(short_sword, weapon_slot, modify_attack(player, 3)).
+item(short_sword, weapon_slot, attack(player, 3)).
 item(chainmail, armor_slot, defense(player, 3)).
 item(crown, head_slot, king_status(player, yes)).
 item(spellbook, magic_slot, magic_attack(player, 10)).
@@ -744,7 +751,7 @@ game_in_play :-
     write("Game has already started."), nl.
     
 new :- 
-    load_default_equipment, load_default_status, load_default_player_stats, load_default_locations,
+    load_default_equipment, load_default_status, load_default_locations,
     tutorial, description(character).
 
 load :- load_game, retract(current_node_is(home)), !.
