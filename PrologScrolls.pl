@@ -118,13 +118,6 @@ modify_stat(Stat, Modifier) :-
     ; Stat = magic_defense -> magic_defense(player, OldValue), NewValue is OldValue + Modifier, retract(magic_defense(player, OldValue)), assert(magic_defense(player, NewValue))
     ).
 
-/*
-modify_stat(Stat, Modifier) :-
-    ( Stat = attack -> attack(player, OldValue), NewValue is OldValue + Modifier, retract(attack(player, OldValue)), assert(attack(player, NewValue))
-    ; Stat = defense -> defense(player, OldValue), NewValue is OldValue + Modifier, retract(defense(player, OldValue)), assert(defense(player, NewValue))
-    ; Stat = magic_attack -> magic_attack(player, OldValue), NewValue is OldValue + Modifier, retract(magic_attack(player, OldValue)), assert(magic_attack(player, NewValue))
-    ; Stat = magic_defense -> magic_defense(player, OldValue), NewValue is OldValue + Modifier, retract(magic_defense(player, OldValue)), assert(magic_defense(player, NewValue))).
-*/  
 
 increase_level :- 
     level(X),
@@ -495,7 +488,9 @@ inspect(player) :-
     attack(player, A),
     magic_attack(player, MA),
     magic_defense(player, MD),
+    get_current_character(Character),
     format("Current level: ~w", [L]), nl,
+    format("Current Character: ~w", [Character]),nl,
     format("Head slot: ~w", [X]), nl,
     format("Armor slot: ~w", [Z]), nl,
     format("Cape slot: ~w", [C]), nl,
