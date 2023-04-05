@@ -252,7 +252,7 @@ edge(castle, south, home) :- equipped(head_slot, crown). % fast travel for end o
 
 edge(crossroads, north, forest) :- equipped(weapon_slot, short_sword), equipped(armor_slot, chainmail).
 edge(crossroads, north, forest) :- equipped(weapon_slot, halberd), equipped(armor_slot, chainmail).
-edge(crossroads, north, forest) :- write("It would be suicide to enter the forest without armor and weapons!"), nl, !, fail.
+edge(crossroads, north, forest) :- write("It would be suicide to enter the forest wthout armor and weapons!"), nl, !, fail.
 edge(crossroads, west, abandoned_house).
 edge(crossroads, east, armory).
 
@@ -311,10 +311,18 @@ load_default_locations :-
 
 % add health potions to shop or somewhere else
 
+
+equip_item(Stat, Modifier) :-
+    reset_stat(Stat),
+    modify_stat(Stat, Modifier).
+
+
 /*
 Initialize the stats of each item
 */
-item(short_sword, weapon_slot, attack(player, 3)).
+
+item(short_sword, weapon_slot, equip_item(attack, 3)).
+
 item(chainmail, armor_slot, defense(player, 3)).
 item(crown, head_slot, king_status(player, yes)).
 item(spellbook, magic_slot, magic_attack(player, 10)).
@@ -422,10 +430,17 @@ buy(quality_cloak) :- write("You don't have enough gold!"), nl, fail.
 item events
 */
 
-item_event(I, S):- functor(S, F, N), OldStat =.. [F, player, B] , assert(S), retract(OldStat),
- nl, format("Item Aqquired: ~w", [I]), nl
-, format("Old stat: ~w", [OldStat]), nl ,
- format("new stat: ~w", [S]), !.
+%item_event(I, S):- functor(S, F, N), OldStat =.. [F, player, B] , assert(S), retract(OldStat),
+ %nl, format("Item Aqquired: ~w", [I]), nl
+%, format("Old stat: ~w", [OldStat]), nl ,
+% format("new stat: ~w", [S]), !.
+
+ item_event(I, S):- 
+    functor(S, name, N),
+    arg(1, S, Stat),
+    assert(S),
+    nl, format("Item Aqquired: ~w", [I]), nl,
+     format("~w increased by ~w", [Stat, N]), !.
 
 item_event(_, _) :- !.
 
