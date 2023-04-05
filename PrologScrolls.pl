@@ -433,6 +433,20 @@ add_potion(I):- item(I, potion, N), potion_count(I, C), NC is C + N, assert(poti
 , write(I), format(" count increased to : ~w", [NC]), !.
 
 /*
+extract_stat(Item, Stat, Modifier) :-
+    functor(Item, _, Arity),
+    Arity =:= 3,
+    arg(3, Item, StatMod),
+    functor(StatMod, Stat, 1),
+    arg(1, StatMod, player),
+    arg(2, StatMod, Modifier).
+*/
+
+extract_stat(Item, Stat, Modifier) :-
+    Item =.. [_, _, _, StatTerm],
+    StatTerm =.. [Stat, player, Modifier].
+
+/*
 Describes the players gear.
 */
 
@@ -717,7 +731,7 @@ load :- load_game, retract(current_node_is(home)), !.
 
 options :-
     nl,
-    write("Welcome to - The Legend of Lelda: Zink's Awakening!"), nl,
+    write("Welcome to - PrologScrolls!"), nl,
     write("To begin you can either start a new game by typing 'new.'"), nl,
     write("Or you can load a previous save by typing 'load.'"), nl, !.
 
