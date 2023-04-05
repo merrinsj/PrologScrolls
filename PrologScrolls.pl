@@ -10,6 +10,7 @@ and then type 'play.'
 
 different(X, X) :- !, fail.
 different(X, Y).
+
 /*
 Create player's character.
 */
@@ -57,35 +58,6 @@ create_character(Race) :-
         assert(magic_defense(player, 1)),
         write('Kinko character created successfully!'), nl;
     write('Invalid race!'), nl), description(home).
-
-/*
-create_character(argonian) :-
-    assert(health(player, 50)),
-    assert(defense(player, 1)),
-    assert(attack(player, 1)),
-    assert(magic_attack(player, 1)),
-    assert(magic_defense(player, 1)),
-    assert(status(player, alive)),
-    write('Argonian character created successfully!'), nl.
-
-create_character(khajiit) :-
-    assert(health(player, 50)),
-    assert(defense(player, 1)),
-    assert(attack(player, 1)),
-    assert(magic_attack(player, 1)),
-    assert(magic_defense(player, 1)),
-    assert(status(player, alive)),
-    write('Khajiit character created successfully!'), nl.
-
-create_character(kinko) :-
-    assert(health(player, 50)),
-    assert(defense(player, 1)),
-    assert(attack(player, 1)),
-    assert(magic_attack(player, 1)),
-    assert(magic_defense(player, 1)),
-    assert(status(player, alive)),
-    write('Kinko character created successfully!'), nl.
-*/
 
 /*
 The players equipment.
@@ -148,14 +120,6 @@ increase_level :-
 /*
 stats for characters
 */
-
-load_default_player_stats :-
-    assert(level(1)),
-    assert(health(player, 50)),
-    assert(defense(player, 1)),
-    assert(attack(player, 1)),
-    assert(magic_attack(player, 1)),
-    assert(magic_defense(player, 1)).
 
 %king_status(player, no).
 health(slime, 15).
