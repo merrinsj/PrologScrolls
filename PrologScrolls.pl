@@ -1,6 +1,6 @@
 :- style_check(-singleton).
 :- dynamic current_node_is/1, equipped/2, located/2, health/2, defense/2, attack/2, magic_attack/2, magic_defense/2, prev_node/1, status/2,
-  king_status/2, gold/1, potion_count/2, interactable/2, experience/1, level/1, current_character/1, game_begin/0, traverse_darkness/1, traverse_height/1, traverse_water/1.
+necromancer_status/2, gold/1, potion_count/2, interactable/2, experience/1, level/1, current_character/1, game_begin/0, traverse_darkness/1, traverse_height/1, traverse_water/1.
 
 
 /*
@@ -135,42 +135,42 @@ increase_level :-
 stats for characters
 */
 
-%king_status(player, no).
-health(slime, 15).
+%necromancer_status(player, no).
+health(mudcrab, 15).
 health(ghost, 15).
-health(king, 50).
+health(necromancer, 50).
 health(troll, 25).
 health(skeleton, 20).
 
-defense(slime, 1).
+defense(mudcrab, 1).
 defense(ghost, 100).
-defense(king, 5).
+defense(necromancer, 5).
 defense(troll, 3).
 defense(skeleton, 4).
 
-attack(slime, 1).
+attack(mudcrab, 1).
 attack(ghost, 0).
-attack(king, 7).
+attack(necromancer, 7).
 attack(troll, 3).
 attack(skeleton, 1).
 
-magic_attack(slime, 1).
+magic_attack(mudcrab, 1).
 magic_attack(ghost, 2).
-magic_attack(king, 5).
+magic_attack(necromancer, 5).
 magic_attack(troll, 0).
 magic_attack(skeleton, 4).
 
-magic_defense(slime, 1).
+magic_defense(mudcrab, 1).
 magic_defense(ghost, 1).
-magic_defense(king, 5).
+magic_defense(necromancer, 5).
 magic_defense(troll, 2).
 magic_defense(skeleton, 4).
 
 load_default_status :-
-    assert(status(slime, alive)),
+    assert(status(mudcrab, alive)),
     assert(status(ghost, alive)),
     assert(status(player, alive)),
-    assert(status(king, alive)),
+    assert(status(necromancer, alive)),
     assert(status(troll, alive)),
     assert(status(skeleton, alive)).
 
@@ -210,17 +210,17 @@ magic_attack(Y):- deal_magic_damage(player,Y), deal_damage_monster(Y, player), c
 check_dead(player):-  health(player, H), H < 1 , status(player, S), assert(status(player, dead)), retract(status(player, S)),
  nl, write("You are dead. Game Over."), nl, halt(1).
 
-check_dead(X):- different(X, player), different(X, king), health(X, H), H < 1 , status(X, S), assert(status(X, dead)), retract(status(X, S)),
+check_dead(X):- different(X, player), different(X, necromancer), health(X, H), H < 1 , status(X, S), assert(status(X, dead)), retract(status(X, S)),
  nl, write(X), write(" is dead. You are safe to travel again."), nl, current_node_is(N), prev_node(PN), dead_event(X),
  assert(current_node_is(PN)), retract(current_node_is(N)), retract(prev_node(PN)), !.
 
 check_dead(X):- different(X, player), health(X, H), H < 1, status(X, S), assert(status(X, dead)), retract(status(X, S)), current_node_is(N), prev_node(PN),
  assert(current_node_is(PN)), retract(current_node_is(N)), retract(prev_node(PN)), scene(PN),
- nl, write("The king is finally dead. Now go home and restore balance to your homeland!"), nl, !.
+ nl, write("The necromancer is finally dead. The dark clouds above you begin to recede. You gaze out towards the horizon of a better world."), nl, !.
 
 check_dead(_) :- !.
 
-dead_event(slime):- add_potion(health_potion), add_gold(10).
+dead_event(mudcrab):- add_potion(health_potion), add_gold(10).
 
 dead_event(ghost):- add_gold(10).
 
@@ -238,18 +238,18 @@ describe_battle(X, Y):- health(X, H1), health(Y, H2), nl,
 events for each location.
 */
 
-event(slime_field):- 
-status(slime, alive), write("You are attacked by a slime!"), nl, sleep(2), nl, battle(slime), !. 
+event(mudcrab_field):- 
+status(mudcrab, alive), write("You are attacked by a mudcrab!"), nl, sleep(2), nl, battle(mudcrab), !. 
 
-event(river) :-
-status(troll, alive), write("You come to a bridge that spans the river, but a troll jumps out to block your way!"), nl, sleep(2), nl, battle(troll), !.
+event(cave) :-
+status(troll, alive), write("You slowly pick your way through the cave, but a troll jumps out to attack you!"), nl, sleep(2), nl, battle(troll), !.
 
-event(tower) :-
-status(skeleton, alive), write("After climbing the spiral staircase to the top of the tower, the skeletal remains of an ancient wizard attacks you!"), nl, sleep(2), nl, battle(skeleton), !.
+event(wasteland) :-
+status(skeleton, alive), write("After exiting the decaying forest, you notice skeletal remains littering the ground. Suddenly the skeletal remains of an ancient wizard attacks you!"), nl, sleep(2), nl, battle(skeleton), !.
 
 event(boss):-
-status(king, alive), write("You enter the throne room; the evil king is waiting with his broadsword at the ready. He is large and cunning, you will need all your strength to defeat him."), nl,
-sleep(2), nl, write("You lunge forward to engage the evil king in battle!"), nl, battle(king), !.
+status(necromancer, alive), write("You enter the throne room; the evil necromancer is waiting with his staff at the ready. He is ancient and cunning, you will need all your strength to defeat him."), nl,
+sleep(2), nl, write("You lunge forward to engage the evil necromancer in battle!"), nl, battle(necromancer), !.
 
 event(_) :- !.
 
@@ -261,8 +261,6 @@ Represents an edge from the current node, travelling in the given direction and 
 */
 
 edge(home, north, crossroads).
-
-edge(castle, south, home) :- equipped(head_slot, crown). % fast travel for end of game
 
 edge(crossroads, north, cave) :- equipped(weapon_slot, short_sword), equipped(armor_slot, chainmail).% traverse_darkness(true).
 edge(crossroads, north, cave) :- equipped(weapon_slot, halberd), equipped(armor_slot, chainmail).% traverse_darkness(true).
@@ -283,14 +281,17 @@ edge(shop, west, mountain_pass).
 
 edge(lake, south, mountain_pass).
 edge(lake, north, lake_island).     %repair boat or be argonian
-edge(lake, west, forest).
+edge(lake, west, dark_forest).
 edge(lake_island, south, lake).
 
-edge(forest, east, lake).
-edge(forest, north, wasteland).
+edge(dark_forest, east, lake).
+edge(dark_forest, north, wasteland).
 
-edge(wasteland, north, castle).
-edge(wasteland, south, forest).
+edge(wasteland, north, tower).
+edge(wasteland, south, dark_forest).
+
+edge(tower, north, boss).
+edge(tower, south, wasteland).
 
 edge(abandoned_house, east, crossroads).
 edge(abandoned_house, west, cemetery).
@@ -298,13 +299,13 @@ edge(cemetery, east, abandoned_house).
 
 
 edge(armory, west, crossroads).
-edge(armory, south, slime_field).
-edge(slime_field, north, armory).
+edge(armory, south, mudcrab_field).
+edge(mudcrab_field, north, armory).
 
-edge(slime_field, east, cave) :- located(halberd, weapon_slot), write("It would mean sure death to go back into that cave."), nl, !, fail.
-edge(slime_field, east, cave) :- located(halberd, narnia), write("It would mean sure death to go back into that cave."), nl, !, fail.
-edge(slime_field, east, cave).
-edge(cave, west, slime_field).
+edge(mudcrab_field, east, cave) :- located(halberd, weapon_slot), write("It would mean sure death to go back into that cave."), nl, !, fail.
+edge(mudcrab_field, east, cave) :- located(halberd, narnia), write("It would mean sure death to go back into that cave."), nl, !, fail.
+edge(mudcrab_field, east, cave).
+edge(cave, west, mudcrab_field).
 
 
 map :- current_node_is(X), nl, format("currently in ~w. ", [X]), nl.
@@ -325,12 +326,12 @@ load_default_locations :-
     assert(located(hammer, shop)),
 
     assert(located(halberd, cave)),
-    assert(located(crown, boss)),
-    assert(located(spellbook, tower)),
-    assert(located(pristine_cloak, tower)),
+
+    assert(located(spellbook, wasteland)),
+    assert(located(pristine_cloak, wasteland)),
     assert(located(frost_wand, cemetery)),
     assert(located(rugged_cloak, cemetery)),
-    assert(located(magic_staff, forest)),
+    assert(located(magic_staff, cave)),
     assert(located(broadsword, shop)),
     assert(located(battle_axe, shop)),
     assert(located(breastplate, shop)),
@@ -360,7 +361,6 @@ item(chainmail, armor_slot, equip_item(defense, 3)).
 item(breastplate, armor_slot, equip_item(defense, 7)).
 
 %Utility items
-item(crown, utility_slot, king_status(player, yes)).
 item(torch, utility_slot, traverse_darkness(true)).
 item(rope, utility_slot, traverse_height(true)).
 item(boat, utility_slot, traverse_water(true)).
@@ -381,7 +381,7 @@ item(nothing, weapon_slot, attack(player, 1)).
 item(nothing, armor_slot, defense(player, 1)).
 item(nothing, magic_slot, magic_attack(player, 1)).
 item(nothing, cape_slot, magic_defense(player, 1)).
-item(nothing, utility_slot, format("")).
+item(nothing, utility_slot, _).
 
 search :- current_node_is(X), nl, format("searching ~w for items. ", [X]).
 search :- current_node_is(X), located(I, X), nl, format("~w", [I]).
@@ -621,12 +621,12 @@ description(armory) :-
     nl,
     write("There is a field to the south of the now empty armory, and the crossroads are to the west."), nl.
 
-description(slime_field) :-
+description(mudcrab_field) :-
     located(halberd, cave),
     nl,
-    write("This field has been infested with slimes since the spread of the king's chaos. You see a cave"), nl,
+    write("This field has been infested with mudcrabs since the spread of the necromancer's chaos. You see a cave"), nl,
     write("to the east of the field's edge, or you can turn back north to the relative safety of the armory."), nl.
-description(slime_field) :-
+description(mudcrab_field) :-
     nl,
     write("The cave is too dangerous to return to, the only way out from here is back north to the armory."), nl.
 
@@ -678,10 +678,7 @@ description(cave) :-
     write("With the troll dead, you continue to navigate the gloom with your torch held aloft. In the middle of the dark cave, you see a huge, gnarled root with a [magic_staff] carved out of it."), nl,
     write("Enter 'take(magic_staff)' to equip the item."), nl,
     write("To the north you can just see a small light indicating the caves exit."), nl.
-description(forest) :-
-    %equipped(magic_slot, magic_staff),
-    nl,
-    write("To the west you can just see a small shopkeep through the trees, and to the north is a wide river between the forest and the castle."), nl.
+
 
 description(shop) :-
     located(fire_wand, shop),
@@ -692,16 +689,16 @@ description(shop) :-
     write("You find a yordle selling her wares in the shelter of a rocky outcrop."), nl,
     write("For sale is a [broadsword] for 20 gold, a [battle_axe] for 20 gold, a [breastplate] for 30 gold, a [fire_wand] for 50 gold, and a [quality_cloak] for 30 gold"), nl,
     write("Enter 'take(___)' for any items you'd like to buy."), nl, % implement shop system?
-    write("The only exit is back east to the forest."), nl.
+    write("The only exit is back west to the cliff edge."), nl.
 description(shop) :-
-    write("The goblin is nowhere to be seen, so the only thing to do is go back east."), nl.
+    write("The yordle is nowhere to be seen, so the only thing to do is go back west."), nl.
 
 description(mountain_pass) :-
     nl,
-    write("You feel a biting chill from the howling wind as you exit the cave onto a frigid mountain pass."), nl.
+    write("You feel a biting chill from the howling wind as you exit the cave onto a frigid mountain pass."), nl,
     write("To the north is a sheer descent to a distant lake. You'll need some equipment to make it down safely"), nl,
     write("To the west looks like a climbers camp. Maybe there is some leftover equipment?"), nl,
-    write("To the east you can make out a shopkeep."), nl,
+    write("To the east you can make out a shopkeep."), nl.
 
 description(climbers_camp) :-
     status(zombies, alive).
@@ -709,10 +706,10 @@ description(climbers_camp)   :-
     nl,
     write("With the zombies gone, you look at your surroundings. You stand upon a plateaur with steep drops on all sides."), nl,
     write("There are boxes and old tents scattered around that have seen better days. Sitting on one of the boxes is an old [rope]."), nl,
-    write("Enter 'take(rope)' to equip the item."), nl
-    write("To the east lies the path forward."), nl
+    write("Enter 'take(rope)' to equip the item."), nl,
+    write("To the east lies the path forward."), nl.
 
-description(lakeside) :-
+description(lake) :-
     nl,
     write("You yourself at the edge of a still lake. Silence permeates the area, but is broken periodically by the cry of a loon."), nl,
     write("In the centre of the lake lies a small island. The water looks dark and sick, due to proximity to the necromancer's tower"), nl,
@@ -724,7 +721,7 @@ description(dark_forest) :-
     nl,
     write("The forest gets progressively thinner and more dead as you close in toward the tower"), nl,
     write("Ahead you can see that the forest gives way to a desolate sight. All of the flora has withered away to leave a dry wasteland."), nl,
-    write("The tower rises menacingly towards the sky in the distance to the north."), nl,
+    write("The tower rises menacingly towards the sky in the distance to the north."), nl.
 
 description(wasteland) :-
     %located(spellbook, tower),
@@ -734,23 +731,23 @@ description(wasteland) :-
     nl,
     write("The corpses of the necromancers servants litter the ground."), nl,
     write("The tower streaks toward the sky before you, so tall you can barely see its summit."), nl,
-    write("You feel a finality permeate the air. This is it. Steel yourself, and rush forward to defeat your enemy!"), nl.
+    write("You feel a finality permeate the air. This is it. Steel yourself, and rush forward to defeat your enemy!"), nl,
     write("Enter 'n.' to enter the wizard's tower."), nl.
 description(tower) :-
     %equipped(magic_slot, spellbook),
     nl,
-    write("There is nothing left here but old vials and tattered robes."), nl,
-    write("Enter 'w.' to leave the tower and return to the main castle grounds."), nl.
+    write("The resistance you were expecting doesn't come. The tower is eerily quiet. Your steps echo on black tiles."), nl,
+    write("You see an ornate staircase that leads up the tower. You pass through empty room after empty room as you slowly scale the tower."), nl,
+    write("You've broken a sweat by the time you reach the top floor. Before you is an enormous door. You can hear energy crackling on the other side."), nl,
+    write("This is it. There's no turning back now."), nl,
+    write("Enter 'n.' to face the necromancer.").
 
 
 description(boss) :-
-    status(king, dead),
+    status(necromancer, dead),
     nl,
-    write("The king drops to the ground, blood soaking his royal robes."), nl,
-    write("You take his crown with the Crystal of Life and place it on your head."), nl,
-    write("Now you must go south to your home and restore balance to the land!"), nl,
-    assert(equipped(head_slot, crown)),
-    retract(equipped(head_slot, nothing)).
+    write("The necromancer drops to the ground, blood soaking his fetid robes."), nl,
+    write("You take the idol he was using to power his destructive wrath and crush it in your hand"), nl.
 description(boss).
 
 /*
