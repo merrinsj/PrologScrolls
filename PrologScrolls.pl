@@ -264,24 +264,33 @@ edge(home, north, crossroads).
 
 edge(castle, south, home) :- equipped(head_slot, crown). % fast travel for end of game
 
-edge(crossroads, north, forest) :- equipped(weapon_slot, short_sword), equipped(armor_slot, chainmail).
-edge(crossroads, north, forest) :- equipped(weapon_slot, halberd), equipped(armor_slot, chainmail).
-edge(crossroads, north, forest) :- write("It would be suicide to enter the forest wthout armor and weapons!"), nl, !, fail.
+edge(crossroads, north, cave) :- equipped(weapon_slot, short_sword), equipped(armor_slot, chainmail).% traverse_darkness(true).
+edge(crossroads, north, cave) :- equipped(weapon_slot, halberd), equipped(armor_slot, chainmail).% traverse_darkness(true).
+edge(crossroads, north, cave) :- write("It would be suicide to enter the cave wthout armor,weapons or a light source!"), nl, !, fail.
 edge(crossroads, west, abandoned_house).
 edge(crossroads, east, armory).
 
-edge(forest, south, crossroads).
-edge(forest, north, river).
-edge(forest, west, shop).
-edge(shop, east, forest).
+edge(cave, south, crossroads).
+edge(cave, north, mountain_pass).
 
-edge(river, north, castle).
-edge(river, south, forest).
-edge(castle, south, river).
-edge(castle, north, boss).
-edge(boss, south, castle).
-edge(castle, east, tower).
-edge(tower, west, castle).
+edge(mountain_pass, north, lake).       %need rope/kinko wings
+edge(mountain_pass, south, cave).
+edge(mountain_pass, west, climbers_camp).
+edge(climbers_camp, east, mountain_pass).
+edge(mountain_pass, east, shop).
+edge(shop, west, mountain_pass).
+
+
+edge(lake, south, mountain_pass).
+edge(lake, north, lake_island).     %repair boat or be argonian
+edge(lake, west, forest).
+edge(lake_island, south, lake).
+
+edge(forest, east, lake).
+edge(forest, north, wasteland).
+
+edge(wasteland, north, castle).
+edge(wasteland, south, forest).
 
 edge(abandoned_house, east, crossroads).
 edge(abandoned_house, west, cemetery).
@@ -310,7 +319,11 @@ Initialize the location of the many items in the game.
 load_default_locations :-
     assert(located(short_sword, armory)),
     assert(located(chainmail, armory)),
+
     assert(located(torch, abandoned_house)),
+    assert(located(rope, climbers_camp)),
+    assert(located(hammer, shop)),
+
     assert(located(halberd, cave)),
     assert(located(crown, boss)),
     assert(located(spellbook, tower)),
@@ -433,19 +446,19 @@ take(I1) :-
     assert(located(I1, Y)), assert(equipped(Y, I1)), retract(located(I1, X)), retract(equipped(Y, I2)), extract_stat(S, Stat, Modifier),
     equip_item(Stat, Modifier), format("Item Aqquired: ~w", [I1]), nl, !.
 take(I1) :- 
-    write("I'm here"),
-    located(I1, X), current_node_is(X), item(I1, Y, S), equipped(Y, I2), different(X, shop), different(item(I1, Y, S), item(_,potion,_)),
+    
+    located(I1, X), write("before curr node"), current_node_is(X), write("is this working"), write("I'm here"), item(I1, Y, S), equipped(Y, I2), different(X, shop), different(item(I1, Y, S), item(_,potion,_)),
     (
-    % Torch: sets traverse_darkness to true
-    I1 = torch -> assert(traverse_darkness(true)), retract(traverse_darkness(false)), write("I'm at the torch clause")
-    ; % Rope: sets traverse_height to true
-    I1 = rope -> assert(traverse_height(true))
-    ; % Boat: sets traverse_water to true
-    I1 = boat -> assert(traverse_water(true))
-    ; % Otherwise, do nothing
-    true
+        % Torch: sets traverse_darkness to true
+        I1 = torch -> (assert(traverse_darkness(true)), retract(traverse_darkness(false)), write("I'm at the torch clause"));
+        % Rope: sets traverse_height to true
+        I1 = rope -> assert(traverse_height(true))
+        ; % Boat: sets traverse_water to true
+        I1 = boat -> assert(traverse_water(true))
+        ; % Otherwise, do nothing
+        true
     ),
-    write("I'm at the end"),
+    write("I'm at the end"), flush_output,
     assert(located(I1, Y)), assert(equipped(Y, I1)), retract(located(I1, X)), retract(equipped(Y, I2)),
     nl, !.
 take(I1):- located(I1, X), current_node_is(X), item(I1, potion, S), add_potion(I1), retract(located(I1, X)), !.
@@ -471,25 +484,7 @@ buy(fire_wand) :- write("You don't have enough gold!"), nl, fail.
 buy(quality_cloak) :- gold(X), X > 29, Y is X - 30, assert(gold(Y)), retract(gold(X)).
 buy(quality_cloak) :- write("You don't have enough gold!"), nl, fail.
 
-/*
-item events
-*/
-/*
-item_event(I, S):- functor(S, F, N), OldStat =.. [F, player, B] , assert(S), retract(OldStat),
- nl, format("Item Aqquired: ~w", [I]), nl
-%, format("Old stat: ~w", [OldStat]), nl ,
-% format("new stat: ~w", [S]), !.
-*/
 
- item_event(I, S):- 
-    functor(S, name, N),
-    arg(1, S, Stat),
-    assert(S),
-    write('S is: '), write(S), nl,
-    nl, format("Item Aqquired: ~w", [I]), nl,
-    format("~w increased by ~w", [Stat, N]), !.
-
-item_event(_, _) :- !.
 
 add_potion(I):- item(I, potion, N), potion_count(I, C), NC is C + N, assert(potion_count(I, NC)), retract(potion_count(I, C)), nl
 , write(I), format(" count increased to : ~w", [NC]), !.
@@ -635,9 +630,9 @@ description(slime_field) :-
     nl,
     write("The cave is too dangerous to return to, the only way out from here is back north to the armory."), nl.
 
-description(cave) :-
+description(crag) :-
     nl,
-    write("You enter the cave, it is dark but you can see enough to spot two valuable items on the ground."), nl,
+    write("You enter the crag, it is dark but you can see enough to spot two valuable items on the ground."), nl,
     write("A treasure chest and a steel [halberd] lie on opposite sides of the cave's mouth."), nl,
     write("But you hear a deep roar echo from the depths of the cave, there is only time to take one item."), nl,
     write("Enter 'take(chest).' or 'take(halberd).' and then run to the west!"), nl. % Fixed
@@ -675,12 +670,14 @@ description(cemetery2) :-
 
 
 % North of Crossroads
-description(forest) :-
-    located(magic_staff, forest),
+description(cave) :-
+    status(troll, alive).
+description(cave) :-
+    located(magic_staff, cave),
     nl,
-    write("In the middle of the dark forest, you see a huge, gnarled tree with a [magic_staff] carved out of its roots."), nl,
+    write("With the troll dead, you continue to navigate the gloom with your torch held aloft. In the middle of the dark cave, you see a huge, gnarled root with a [magic_staff] carved out of it."), nl,
     write("Enter 'take(magic_staff)' to equip the item."), nl,
-    write("To the west you can just see a small shopkeep through the trees, and to the north is a wide river between the forest and the castle."), nl.
+    write("To the north you can just see a small light indicating the caves exit."), nl.
 description(forest) :-
     %equipped(magic_slot, magic_staff),
     nl,
@@ -692,44 +689,53 @@ description(shop) :-
     located(broadsword, shop),
     located(breastplate, shop),
     located(quality_cloak, shop),
-    write("You find a goblin selling his wares in the middle of a small clearing."), nl,
+    write("You find a yordle selling her wares in the shelter of a rocky outcrop."), nl,
     write("For sale is a [broadsword] for 20 gold, a [battle_axe] for 20 gold, a [breastplate] for 30 gold, a [fire_wand] for 50 gold, and a [quality_cloak] for 30 gold"), nl,
     write("Enter 'take(___)' for any items you'd like to buy."), nl, % implement shop system?
     write("The only exit is back east to the forest."), nl.
 description(shop) :-
     write("The goblin is nowhere to be seen, so the only thing to do is go back east."), nl.
 
-description(river) :-
-    status(troll, alive).
-description(river) :-
+description(mountain_pass) :-
     nl,
-    write("With the troll vanquished, you can continue north across the bridge to reach the evil king's castle, which looms large in the distance."), nl.
+    write("You feel a biting chill from the howling wind as you exit the cave onto a frigid mountain pass."), nl.
+    write("To the north is a sheer descent to a distant lake. You'll need some equipment to make it down safely"), nl,
+    write("To the west looks like a climbers camp. Maybe there is some leftover equipment?"), nl,
+    write("To the east you can make out a shopkeep."), nl,
 
-description(castle) :-
-    equipped(head_slot, crown),
+description(climbers_camp) :-
+    status(zombies, alive).
+description(climbers_camp)   :-
     nl,
-    write("You begin the journey home, tired from your quest but driven by the thought of bringing peace back to the land."),
-    move(south).
-description(castle) :-
-    located(spellbook, tower),
+    write("With the zombies gone, you look at your surroundings. You stand upon a plateaur with steep drops on all sides."), nl,
+    write("There are boxes and old tents scattered around that have seen better days. Sitting on one of the boxes is an old [rope]."), nl,
+    write("Enter 'take(rope)' to equip the item."), nl
+    write("To the east lies the path forward."), nl
+
+description(lakeside) :-
     nl,
-    write("The castle door is locked, but you find a side entrance to sneak into. You can continue forward to the throne room or take a right and look around in the wizard's tower."), nl,
-    write("Enter 'n.' to continue forward to the throne room, or enter 'e.' to turn right and search the wizard's tower."), nl.
-description(castle) :-
+    write("You yourself at the edge of a still lake. Silence permeates the area, but is broken periodically by the cry of a loon."), nl,
+    write("In the centre of the lake lies a small island. The water looks dark and sick, due to proximity to the necromancer's tower"), nl,
+    write("Beside you lies a boat that has fallen into disrepair. Maybe you could repair it with something?"), nl,
+    write("Surrounding you is dense forest, but you can see the tower looming. You can make out a path to the west."), nl.
+
+description(dark_forest) :-
     %equipped(magic_slot, spellbook),
     nl,
-    write("Your final battle is ahead of you. The evil king resides in the throne room just ahead. Steel your resolve and prepare to fight!"), nl,
-    write("Enter 'n.' to go back to the castle and face your enemy."), nl.
+    write("The forest gets progressively thinner and more dead as you close in toward the tower"), nl,
+    write("Ahead you can see that the forest gives way to a desolate sight. All of the flora has withered away to leave a dry wasteland."), nl,
+    write("The tower rises menacingly towards the sky in the distance to the north."), nl,
 
-description(tower) :-
-    located(spellbook, tower),
-    status(skeleton, alive).
-description(tower) :-
-    located(spellbook, tower),
+description(wasteland) :-
+    %located(spellbook, tower),
+    status(undead, alive).
+description(wasteland) :-
+    %located(spellbook, tower),
     nl,
-    write("The scattered bones reveal the skeleton's magical arsenal: a wizard's [spellbook]."), nl,
-    write("Enter 'take(spellbook)' to equip the magical book."), nl,
-    write("Enter 'w.' to leave the tower and return to the main castle grounds."), nl.
+    write("The corpses of the necromancers servants litter the ground."), nl,
+    write("The tower streaks toward the sky before you, so tall you can barely see its summit."), nl,
+    write("You feel a finality permeate the air. This is it. Steel yourself, and rush forward to defeat your enemy!"), nl.
+    write("Enter 'n.' to enter the wizard's tower."), nl.
 description(tower) :-
     %equipped(magic_slot, spellbook),
     nl,
