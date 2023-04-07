@@ -1,6 +1,6 @@
 :- style_check(-singleton).
 :- dynamic current_node_is/1, equipped/2, located/2, health/2, defense/2, attack/2, magic_attack/2, magic_defense/2, prev_node/1, status/2,
-  king_status/2, gold/1, potion_count/2, interactable/2, experience/1, level/1, current_character/1, game_begin/0.
+  king_status/2, gold/1, potion_count/2, interactable/2, experience/1, level/1, current_character/1, game_begin/0, traverse_darkness/1, traverse_height/1, traverse_water/1.
 
 
 /*
@@ -40,6 +40,9 @@ create_character(Race) :-
         assert(attack(player, 1)),
         assert(magic_attack(player, 1)),
         assert(magic_defense(player, 1)),
+        assert(traverse_water(true)),
+        assert(traverse_darkness(false)),
+        assert(traverse_height(false)),
         write('Argonian character created successfully!'), nl;
     Race = khajiit ->
         assert(level(1)),
@@ -48,6 +51,9 @@ create_character(Race) :-
         assert(attack(player, 1)),
         assert(magic_attack(player, 1)),
         assert(magic_defense(player, 1)),
+        assert(traverse_water(false)),
+        assert(traverse_darkness(true)),
+        assert(traverse_height(false)),
         write('Khajiit character created successfully!'), nl;
     Race = kinko ->
         assert(level(1)),
@@ -56,6 +62,9 @@ create_character(Race) :-
         assert(attack(player, 1)),
         assert(magic_attack(player, 1)),
         assert(magic_defense(player, 1)),
+        assert(traverse_water(false)),
+        assert(traverse_darkness(false)),
+        assert(traverse_height(true)),
         write('Kinko character created successfully!'), nl;
     write('Invalid race!'), nl), description(home).
 
@@ -68,6 +77,7 @@ load_default_equipment :-
     assert(equipped(head_slot, nothing)),
     assert(equipped(magic_slot, nothing)),
     assert(equipped(cape_slot, nothing)),
+    assert(equipped(utility_slot, nothing)),
     assert(potion_count(health_potion, 0)),
     assert(experience(0)),
     assert(gold(0)).
@@ -84,10 +94,14 @@ reset_stat(Stat) :-
     ; Stat = magic_defense -> retract(magic_defense(player, _)), assert(magic_defense(player, L))).
 
 modify_stat(Stat, Modifier) :-
-    ( Stat = attack -> attack(player, OldValue), NewValue is OldValue + Modifier, retract(attack(player, OldValue)), assert(attack(player, NewValue))
-    ; Stat = defense -> defense(player, OldValue), NewValue is OldValue + Modifier, retract(defense(player, OldValue)), assert(defense(player, NewValue))
-    ; Stat = magic_attack -> magic_attack(player, OldValue), NewValue is OldValue + Modifier, retract(magic_attack(player, OldValue)), assert(magic_attack(player, NewValue))
-    ; Stat = magic_defense -> magic_defense(player, OldValue), NewValue is OldValue + Modifier, retract(magic_defense(player, OldValue)), assert(magic_defense(player, NewValue))
+    ( Stat = attack -> attack(player, OldValue), NewValue is OldValue + Modifier, retract(attack(player, OldValue)), assert(attack(player, NewValue)), 
+    format("Your ~w increased by ~w", [Stat, Modifier]), nl
+    ; Stat = defense -> defense(player, OldValue), NewValue is OldValue + Modifier, retract(defense(player, OldValue)), assert(defense(player, NewValue)),
+    format("Your ~w increased by ~w", [Stat, Modifier]), nl
+    ; Stat = magic_attack -> magic_attack(player, OldValue), NewValue is OldValue + Modifier, retract(magic_attack(player, OldValue)), assert(magic_attack(player, NewValue)),
+    format("Your ~w increased by ~w", [Stat, Modifier]), nl
+    ; Stat = magic_defense -> magic_defense(player, OldValue), NewValue is OldValue + Modifier, retract(magic_defense(player, OldValue)), assert(magic_defense(player, NewValue)),
+    format("Your ~w increased by ~w", [Stat, Modifier]), nl
     ).
 
 
@@ -294,8 +308,9 @@ Initialize the location of the many items in the game.
 */
 
 load_default_locations :-
-    assert(located(short_sword, abandoned_house)),
+    assert(located(short_sword, armory)),
     assert(located(chainmail, armory)),
+    assert(located(torch, abandoned_house)),
     assert(located(halberd, cave)),
     assert(located(crown, boss)),
     assert(located(spellbook, tower)),
@@ -312,39 +327,48 @@ load_default_locations :-
 % add health potions to shop or somewhere else
 
 
-
+equip_item(Stat, Modifier) :-
+    reset_stat(Stat),
+    modify_stat(Stat, Modifier).
 
 
 /*
 Initialize the stats of each item
 */
 
+%Attack items
 item(short_sword, weapon_slot, equip_item(attack, 3)).
+item(halberd, weapon_slot, equip_item(attack, 5)).
+item(battle_axe, weapon_slot, equip_item(attack, 7)).
+item(broadsword, weapon_slot, equip_item(attack, 10)).
 
-equip_item(Stat, Modifier) :-
-    write("made it here"),
-    reset_stat(Stat),
-    modify_stat(Stat, Modifier).
+%Defense items
+item(chainmail, armor_slot, equip_item(defense, 3)).
+item(breastplate, armor_slot, equip_item(defense, 7)).
 
-item(chainmail, armor_slot, defense(player, 3)).
-item(crown, head_slot, king_status(player, yes)).
-item(spellbook, magic_slot, magic_attack(player, 10)).
-item(halberd, weapon_slot, attack(player, 5)).
-item(battle_axe, weapon_slot, attack(player, 7)).
-item(frost_wand, magic_slot, magic_attack(player, 3)).
-item(magic_staff, magic_slot, magic_attack(player, 5)).
-item(broadsword, weapon_slot, attack(player, 10)).
-item(breastplate, armor_slot, defense(player, 7)).
-item(fire_wand, magic_slot, magic_attack(player, 7)).
-item(rugged_cloak, cape_slot, magic_defense(player, 2)).
-item(quality_cloak, cape_slot, magic_defense(player, 4)).
-item(pristine_cloak, cape_slot, magic_defense(player, 5)).
+%Utility items
+item(crown, utility_slot, king_status(player, yes)).
+item(torch, utility_slot, traverse_darkness(true)).
+item(rope, utility_slot, traverse_height(true)).
+item(boat, utility_slot, traverse_water(true)).
+
+%Magic attack items
+item(frost_wand, magic_slot, equip_item(magic_attack, 3)).
+item(magic_staff, magic_slot, equip_item(magic_attack, 5)).
+item(fire_wand, magic_slot, equip_item(magic_attack, 7)).
+item(spellbook, magic_slot, equip_item(magic_attack, 10)).
+
+%Defense items
+item(rugged_cloak, cape_slot, equip_item(magic_defense, 2)).
+item(quality_cloak, cape_slot, equip_item(magic_defense, 4)).
+item(pristine_cloak, cape_slot, equip_item(magic_defense, 5)).
 item(health_potion, potion, 1).
 
 item(nothing, weapon_slot, attack(player, 1)).
 item(nothing, armor_slot, defense(player, 1)).
 item(nothing, magic_slot, magic_attack(player, 1)).
 item(nothing, cape_slot, magic_defense(player, 1)).
+item(nothing, utility_slot, format("")).
 
 search :- current_node_is(X), nl, format("searching ~w for items. ", [X]).
 search :- current_node_is(X), located(I, X), nl, format("~w", [I]).
@@ -402,12 +426,28 @@ take(chest) :- add_gold(50), assert(located(halberd, narnia)), retract(located(h
 take(I1) :-
     located(I1, shop), current_node_is(shop), item(I1, Y, S), equipped(Y, I2), different(item(I1, Y, S), item(_,potion,_)),
     buy(I1),
-    assert(located(I1, Y)), assert(equipped(Y, I1)), retract(located(I1, X)), retract(equipped(Y, I2)), item_event(I1, S)
-    , nl, !.
+    assert(located(I1, Y)), assert(equipped(Y, I1)), retract(located(I1, X)), retract(equipped(Y, I2)), extract_stat(S, Stat, Modifier),
+    equip_item(Stat, Modifier), nl, !.
 take(I1) :- 
     located(I1, X), current_node_is(X), item(I1, Y, S), equipped(Y, I2), different(X, shop), different(item(I1, Y, S), item(_,potion,_)),
-    assert(located(I1, Y)), assert(equipped(Y, I1)), retract(located(I1, X)), retract(equipped(Y, I2)),extract_stat(S, Stat, Modifier),
-    equip_item(Stat, Modifier), nl, !.
+    assert(located(I1, Y)), assert(equipped(Y, I1)), retract(located(I1, X)), retract(equipped(Y, I2)), extract_stat(S, Stat, Modifier),
+    equip_item(Stat, Modifier), format("Item Aqquired: ~w", [I1]), nl, !.
+take(I1) :- 
+    write("I'm here"),
+    located(I1, X), current_node_is(X), item(I1, Y, S), equipped(Y, I2), different(X, shop), different(item(I1, Y, S), item(_,potion,_)),
+    (
+    % Torch: sets traverse_darkness to true
+    I1 = torch -> assert(traverse_darkness(true)), retract(traverse_darkness(false)), write("I'm at the torch clause")
+    ; % Rope: sets traverse_height to true
+    I1 = rope -> assert(traverse_height(true))
+    ; % Boat: sets traverse_water to true
+    I1 = boat -> assert(traverse_water(true))
+    ; % Otherwise, do nothing
+    true
+    ),
+    write("I'm at the end"),
+    assert(located(I1, Y)), assert(equipped(Y, I1)), retract(located(I1, X)), retract(equipped(Y, I2)),
+    nl, !.
 take(I1):- located(I1, X), current_node_is(X), item(I1, potion, S), add_potion(I1), retract(located(I1, X)), !.
 take(_) :- write("Unable to acquire that item."), !.
 
@@ -470,12 +510,16 @@ inspect(player) :-
     equipped(armor_slot, Z),
     equipped(magic_slot, M),
     equipped(cape_slot, C),
+    equipped(utility_slot, U),
     health(player, H),
     defense(player, D),
     attack(player, A),
     magic_attack(player, MA),
     magic_defense(player, MD),
     get_current_character(Character),
+    traverse_darkness(TD),
+    traverse_height(TH),
+    traverse_water(TW),
     format("Current level: ~w", [L]), nl,
     format("Current Character: ~w", [Character]),nl,
     format("Head slot: ~w", [X]), nl,
@@ -483,7 +527,17 @@ inspect(player) :-
     format("Cape slot: ~w", [C]), nl,
     format("Weapon slot: ~w", [Y]), nl,
     format("Magic slot: ~w", [M]), nl,
+    format("Utility slot: ~w", [U]), nl,
     format("You currently have ~2f HP, ~w Attack, ~w Defence, ~w Magic Attack and ~w Magic Defence.", [H, A, D, MA, MD]), nl,
+    ( TW == true ->
+    format("You can traverse water."), nl
+    ; TW == false -> format("")),
+    ( TD == true ->
+    format("You can traverse darkness."), nl
+    ; TD == false -> format("")),
+    ( TH == true ->
+    format("You can traverse heights."), nl
+    ; TH == false -> format("")),
     format("You are carrying ~w gold coins and ~w health potion(s).", [G, P]), nl,
     format("You have ~w experience points.", [E]), nl, !.
 inspect(health_potion) :-
@@ -543,17 +597,16 @@ description(home) :-
     halt(1).
 description(home) :-
     nl,
-    write("You look around at the chaos the evil king has brought to your homeland."), nl,
-    write("The trees are blackened, the meadows turned to swamps, and the animals have deserted this place."), nl,
-    write("You must defeat the king and take his crown, which contains the Crystal of Life."), nl,
-    write("With the crown in hand you can finally restore balance to the land."), nl,
-    write("To the north you see the distant crossroads, everywhere else around you is a thick forest."), nl.
+    write("You look around at the destruction the the evil necromancers undead have caused to your home. Its ruined. "), nl,
+    write("They swept through this valley like a plague, destroying all in their path"), nl,
+    write("You must defeat the necromancer in order to prevent this from continuing to happen"), nl,
+    write("To the north you see the mountain, on the other side of which the necromancers tower lies"), nl.
 
 description(crossroads) :-
     nl,
     write("You reach the crossroads, from here you can go in any direction."), nl,
-    write("To the north lies the haunted forest, beyond which is the evil king's castle. It would be unwise to venture there unprepared."), nl,
-    write("To the west you see an abandoned house, perhaps the previous tenant left some weapons behind?"), nl,
+    write("To the north lies a cave, beyond which is the evil necromancer's castle. It is very dark, and it would be unwise to venture there unprepared."), nl,
+    write("To the west you see an abandoned house, perhaps the previous tenant left  a torch behind?"), nl,
     write("To the south is your home, but your quest lies ahead of you."), nl,
     write("To the east you see an armory, there might still be supplies inside."), nl.
 
@@ -561,10 +614,12 @@ description(crossroads) :-
 % East of Crossroads
 description(armory) :-
     located(chainmail, armory),
+    located(short_sword, armory),
     nl,
     write("You enter a decrepit old armory, out of the corner of you eye you spot a glint of metal."), nl,
-    write("You discover [chainmail], this will definitely help you in your fight against the evil king."), nl,
+    write("You discover [chainmail] and a [short_sword], this will definitely help you in your fight against the evil necromancer."), nl,
     write("Enter 'take(chainmail).' to pick up the armor."), nl,
+    write("Enter 'take(short_sword).' to equip the weapon."), nl,
     write("There is a field to the south, and the crossroads are back to the west."), nl.
 description(armory) :-
     equipped(armor_slot, chainmail),
@@ -590,16 +645,16 @@ description(cave) :-
 
 % West of Crossroads
 description(abandoned_house) :-
-    located(short_sword, abandoned_house),
     nl,
-    write("Whoever lived in this house has not been here for a long time, they must have been driven out by dark creatures in this land."), nl,
-    write("You spot a scabbard hung on the wall, with a [short_sword] inside. It may be rusty, but it's better than nothing."), nl,
-    write("Enter 'take(short_sword).' to equip the weapon."), nl,
+    located(torch, abandoned_house),
+    write("Whoever lived in this house has not been here for a long time, they must have been driven out by the necromancer's dark creatures."), nl,
+    write("You spot an open trunk in the corner, with a [torch] and some oil inside. This could allow you to navigate the cave."), nl,
+    write("Enter 'take(torch).' to pick up the torch."), nl,
     write("To the west is a small cemetery covered in fog, and to the east is the crossroads."), nl.
 description(abandoned_house) :-
-    equipped(weapon_slot, short_sword),
+    equipped(utility_slot, torch),
     nl,
-    write("Whoever lived in this house has not been here for a long time, they must have been driven out by dark creatures in this land."), nl,
+    write("Whoever lived in this house has not been here for a long time, they must have been driven out by the necromancer's dark creatures."), nl,
     write("To the west is a small cemetery covered in fog, and to the east is the crossroads."), nl.
 
 description(cemetery) :-
