@@ -86,6 +86,10 @@ add_gold(I) :- gold(X), NG is X + I, assert(gold(NG)), retract(gold(X)), format(
 
 add_exp(I) :- experience(X), NG is X + I, assert(experience(NG)), retract(experience(X)), format(" you gained : ~w exp!", [NG]), nl.
 
+repair(boat) :- 
+    equipped(utility_slot, hammer), assert(traverse_water(true)), retract(traverse_water(false)),
+    write("With the boat repaired, you can now cross the lake. Enter 'n.' to cross."), nl.
+
 reset_stat(Stat) :-
     level(L),
     ( Stat = attack -> retract(attack(player, _)), assert(attack(player, L))
@@ -171,7 +175,7 @@ load_default_status :-
     assert(status(ghost, alive)),
     assert(status(player, alive)),
     assert(status(necromancer, alive)),
-    assert(status(troll, alive)),
+    assert(status(troll, dead)),
     assert(status(skeleton, alive)).
 
 /*
@@ -271,7 +275,8 @@ edge(crossroads, east, armory).
 edge(cave, south, crossroads).
 edge(cave, north, mountain_pass).
 
-edge(mountain_pass, north, lake).       %need rope/kinko wings
+edge(mountain_pass, north, lake) :- traverse_height(true).       %need rope/kinko wings
+edge(mountain_pass, north, lake) :- write("Navigating the steep decline without some appropriate equipment would be too dangerous!"), nl, !, fail.
 edge(mountain_pass, south, cave).
 edge(mountain_pass, west, climbers_camp).
 edge(climbers_camp, east, mountain_pass).
@@ -279,8 +284,9 @@ edge(mountain_pass, east, shop).
 edge(shop, west, mountain_pass).
 
 
-edge(lake, south, mountain_pass).
-edge(lake, north, lake_island).     %repair boat or be argonian
+edge(lake, north, lake_island) :- traverse_water(true).  %repair boat or be argonian
+edge(lake, north, lake_island) :- write("Without some way to repair the boat, traversing the lake is impossible!"), nl, !, fail.
+edge(lake, south, mountain_pass).  
 edge(lake, west, dark_forest).
 edge(lake_island, south, lake).
 
@@ -363,7 +369,7 @@ item(breastplate, armor_slot, equip_item(defense, 7)).
 %Utility items
 item(torch, utility_slot, traverse_darkness(true)).
 item(rope, utility_slot, traverse_height(true)).
-item(boat, utility_slot, traverse_water(true)).
+item(hammer, utility_slot, traverse_water(true)).
 
 %Magic attack items
 item(frost_wand, magic_slot, equip_item(magic_attack, 3)).
@@ -436,6 +442,21 @@ uncover :- current_node_is(X), nl, write("found everything of interest.").
 Handles picking up items.
 */
 take(chest) :- add_gold(50), assert(located(halberd, narnia)), retract(located(halberd, cave)), !.
+take(torch) :- 
+    item(torch, Y, S), equipped(Y, I2),
+    assert(equipped(Y, torch)), retract(equipped(Y, I2)),
+    assert(traverse_darkness(true)), retract(traverse_darkness(false)), 
+    write("Item acquired: torch"), !.
+take(rope) :- 
+    assert(traverse_height(true)), retract(traverse_height(false)), 
+    item(rope, Y, S), equipped(Y, I2),
+    assert(equipped(Y, rope)), retract(equipped(Y, I2)),
+    write("Item acquired: rope"), !.
+take(hammer) :- 
+    located(hammer, shop), current_node_is(shop), buy(hammer),
+    item(hammer, Y, S), equipped(Y, I2),
+    assert(equipped(Y, hammer)), retract(equipped(Y, I2)).
+    write("Item acquired: hammer"), nl, !.
 take(I1) :-
     located(I1, shop), current_node_is(shop), item(I1, Y, S), equipped(Y, I2), different(item(I1, Y, S), item(_,potion,_)),
     buy(I1),
@@ -444,23 +465,7 @@ take(I1) :-
 take(I1) :- 
     located(I1, X), current_node_is(X), item(I1, Y, S), equipped(Y, I2), different(X, shop), different(item(I1, Y, S), item(_,potion,_)),
     assert(located(I1, Y)), assert(equipped(Y, I1)), retract(located(I1, X)), retract(equipped(Y, I2)), extract_stat(S, Stat, Modifier),
-    equip_item(Stat, Modifier), format("Item Aqquired: ~w", [I1]), nl, !.
-take(I1) :- 
-    
-    located(I1, X), write("before curr node"), current_node_is(X), write("is this working"), write("I'm here"), item(I1, Y, S), equipped(Y, I2), different(X, shop), different(item(I1, Y, S), item(_,potion,_)),
-    (
-        % Torch: sets traverse_darkness to true
-        I1 = torch -> (assert(traverse_darkness(true)), retract(traverse_darkness(false)), write("I'm at the torch clause"))
-        ; % Rope: sets traverse_height to true
-        I1 = rope -> assert(traverse_height(true))
-        ; % Boat: sets traverse_water to true
-        I1 = boat -> assert(traverse_water(true))
-        ; % Otherwise, do nothing
-        true
-    ),
-    write("I'm at the end"), flush_output,
-    assert(located(I1, Y)), assert(equipped(Y, I1)), retract(located(I1, X)), retract(equipped(Y, I2)),
-    nl, !.
+    equip_item(Stat, Modifier), format("Item Acquired: ~w", [I1]), nl, !.
 take(I1):- located(I1, X), current_node_is(X), item(I1, potion, S), add_potion(I1), retract(located(I1, X)), !.
 take(_) :- write("Unable to acquire that item."), !.
 
@@ -484,7 +489,10 @@ buy(fire_wand) :- write("You don't have enough gold!"), nl, fail.
 buy(quality_cloak) :- gold(X), X > 29, Y is X - 30, assert(gold(Y)), retract(gold(X)).
 buy(quality_cloak) :- write("You don't have enough gold!"), nl, fail.
 
-buy(hammer) :- gold(X), X > 9, Y is X - 10, assert(gold(Y)), retract(gold(X)).
+buy(hammer) :- 
+    write("in buy hammer!"), nl, 
+    gold(X), X > 9, Y is X - 10, assert(gold(Y)), retract(gold(X)), 
+    format("gold is ~w", [Y]),
 buy(hammer) :- write("You don't have enough gold!"), nl, fail.
 
 
@@ -701,11 +709,18 @@ description(mountain_pass) :-
 
 description(climbers_camp)   :-
     nl,
+    located(rope, climbers_camp),
     write("You stand upon a plateau with steep drops on all sides."), nl,
     write("There are boxes and old tents scattered around that have seen better days. Sitting on one of the boxes is an old [rope]."), nl,
     write("Enter 'take(rope)' to equip the item."), nl,
     write("To the east lies the path forward."), nl.
 
+description(lake) :-
+    equipped(utility_slot, hammer),
+    write("You find yourself at the edge of a still lake. Silence permeates the area, but is broken periodically by the cry of a loon."), nl,
+    write("In the centre of the lake lies a small island. The water looks dark and sick, due to proximity to the necromancer's tower"), nl,
+    write("Beside you lies a boat that has fallen into disrepair. Enter 'repair(boat).' to repair the boat with your hammer."), nl,
+    write("Surrounding you is dense forest, but you can see the tower looming. You can make out a path to the west."), nl.
 description(lake) :-
     nl,
     write("You find yourself at the edge of a still lake. Silence permeates the area, but is broken periodically by the cry of a loon."), nl,
