@@ -455,7 +455,7 @@ take(rope) :-
 take(hammer) :- 
     located(hammer, shop), current_node_is(shop), buy(hammer),
     item(hammer, Y, S), equipped(Y, I2),
-    assert(equipped(Y, hammer)), retract(equipped(Y, I2)).
+    assert(equipped(Y, hammer)), retract(equipped(Y, I2)),
     write("Item acquired: hammer"), nl, !.
 take(I1) :-
     located(I1, shop), current_node_is(shop), item(I1, Y, S), equipped(Y, I2), different(item(I1, Y, S), item(_,potion,_)),
@@ -492,7 +492,7 @@ buy(quality_cloak) :- write("You don't have enough gold!"), nl, fail.
 buy(hammer) :- 
     write("in buy hammer!"), nl, 
     gold(X), X > 9, Y is X - 10, assert(gold(Y)), retract(gold(X)), 
-    format("gold is ~w", [Y]),
+    format("gold is ~w", [Y]).
 buy(hammer) :- write("You don't have enough gold!"), nl, fail.
 
 
