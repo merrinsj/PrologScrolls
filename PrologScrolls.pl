@@ -715,7 +715,7 @@ description(cave) :-
 description(cave) :-
     located(magic_staff, cave),
     nl,
-    write("With the troll dead, you continue to navigate the gloom with your torch held aloft. In the middle of the dark cave, you see a huge, gnarled root with a [magic_staff] carved out of it."), nl,
+    write("With the troll dead, you continue to navigate the gloom. In the middle of the dark cave, you see a huge, gnarled root with a [magic_staff] carved out of it."), nl,
     write("Enter 'take(magic_staff)' to equip the item."), nl,
     write("To the north you can just see a small light indicating the caves exit."), nl.
 description(cave) :-
@@ -772,6 +772,10 @@ description(lake) :-
     write("Your Argonian physiology would allow you to reach the island. Enter 'n.' to go to the island."), nl,
     write("Surrounding you is dense forest, but you can see the tower looming. You can make out a path to the west."), nl.
 description(lake) :-
+    equipped(weapon_slot, excalibur),
+    write("You find yourself at the edge of a still lake. Silence permeates the area, but is broken periodically by the cry of a loon."), nl,
+    write("You grip excalibur with a newfound resolve. The path forward is to the west."), nl,
+description(lake) :-
     equipped(utility_slot, hammer),
     write("You find yourself at the edge of a still lake. Silence permeates the area, but is broken periodically by the cry of a loon."), nl,
     write("In the centre of the lake lies a small island. The water looks dark and sick, due to proximity to the necromancer's tower"), nl,
@@ -786,7 +790,7 @@ description(lake) :-
 description(lake_island) :-
     nl,
     located(excalibur, lake_island),
-    write("You come ashore on a small island. Quaint and idyllic, it looks almost like it's escaped the touch of the necromancer"), nl,
+    write("You come ashore on a small island. Quaint and idyllic, it looks almost like it's escaped the touch of the necromancer."), nl,
     write("In the centre of the lake lies a small pedestal. A single ray of light from the dark sky above illuminates the hilt of a sword."), nl,
     write("A calmness settles upon you."), nl,
     write("Enter 'take(excalibur)' to take the sword. Enter 's.' to return to the lake side."), nl.
@@ -826,7 +830,7 @@ description(boss) :-
     status(necromancer, dead),
     nl,
     write("The necromancer drops to the ground, blood soaking his fetid robes."), nl,
-    write("You take the idol he was using to enact his arcane machinations and crush it in your hand"), nl,
+    write("You take the idol he was using to enact his arcane machinations and crush it in your hand."), nl,
     write("The dark clouds above you begin to recede. You gaze out onto the horizon of a better world."), nl,
     write("You win!"), nl,
     write("Thanks for playing."),
