@@ -226,11 +226,11 @@ check_dead(X):- different(X, player), health(X, H), H < 1, status(X, S), assert(
 
 check_dead(_) :- !.
 
-dead_event(mudcrab):- add_potion(health_potion), add_gold(10), description(mudcrab_field).
+dead_event(mudcrab):- add_potion(health_potion), add_gold(10), description(mudcrab_field), increase_level.
 
 dead_event(ghost):- increase_level, add_gold(10).
 
-dead_event(troll):- add_potion(health_potion), add_gold(20), description(cave).
+dead_event(troll):- add_potion(health_potion), add_gold(20), description(cave), increase_level.
 
 dead_event(skeleton):- increase_level.
 
@@ -515,7 +515,6 @@ inspect(player) :-
     nl,
     level(L),
     gold(G),
-    experience(E),
     potion_count(health_potion, P),
     equipped(head_slot, X),
     equipped(weapon_slot, Y),
@@ -533,7 +532,6 @@ inspect(player) :-
     traverse_water(TW),
     format("Current level: ~w", [L]), nl,
     format("Current Character: ~w", [Character]),nl,
-    format("Head slot: ~w", [X]), nl,
     format("Armor slot: ~w", [Z]), nl,
     format("Cape slot: ~w", [C]), nl,
     format("Weapon slot: ~w", [Y]), nl,
@@ -655,19 +653,25 @@ description(mudcrab_field) :-
     write("This field has been infested with mudcrabs since the spread of the necromancer's chaos. You see a crag"), nl,
     write("to the east of the field's edge, or you can turn back north to the relative safety of the armory."), nl.
 
-
 description(mudcrab_field) :-
     nl,
     status(mudcrab, dead),
     write("The crag is too dangerous to return to, the only way out from here is back north to the armory."), nl.
 
 description(crag) :-
+    located(halberd, narnia),
+    nl,
+    write("You need to run to the west!"), nl. 
+description(crag) :-
+    located(halberd, weapon_slot),
+    nl,
+    write("You need to run to the west!"), nl. 
+description(crag) :-
     nl,
     write("You enter the crag, it is dark but you can see enough to spot two valuable items on the ground."), nl,
     write("A treasure chest and a steel [halberd] lie on opposite sides of the cave's mouth."), nl,
     write("But you hear a deep roar echo from the depths of the cave, there is only time to take one item."), nl,
     write("Enter 'take(chest).' or 'take(halberd).' and then run to the west!"), nl. % Fixed
-
 
 % West of Crossroads
 % If the torch is still in this location, display this description
@@ -907,7 +911,9 @@ Handles saving game state
 save :- current_node_is(battle_dimension), nl, write("Can't save during battles!"), nl, !.
 save :- save_unary_misc, save_binary_misc, save_equipped, save_status, save_located.
 
-save_unary_misc :- current_node_is(X), gold(Y), csv_write_file('save/save_unary_misc.txt', [current_node_is(X), gold(Y)]).
+save_unary_misc :- current_node_is(X), current_character(CC), level(L), 
+    gold(Y), traverse_darkness(TD), traverse_water(TW), traverse_height(TH), 
+    csv_write_file('save/save_unary_misc.txt', [current_node_is(X), current_character(CC), level(L), gold(Y), traverse_darkness(TD), traverse_water(TW), traverse_height(TH)]).
 
 save_binary_misc :- health(player, X), defense(player, Y), attack(player, Z), magic_attack(player, A), magic_defense(player, B), potion_count(health_potion, C),
     csv_write_file('save/save_binary_misc.txt', 
@@ -932,7 +938,9 @@ load_game :- nl, write("Failed to load. Either no save files exist, or you alrea
 fail_load :- nl, play, fail.
 
 load_unary_misc :- csv_read_file('save/save_unary_misc.txt', X), load_unary_misc_state(X).
-load_unary_misc_state([row(X), row(Y)]) :- assert(current_node_is(X)), assert(gold(Y)).
+load_unary_misc_state([row(A), row(B), row(C), row(D), row(E), row(F), row(G)]) :- 
+    assert(current_node_is(A)), assert(current_character(B)), assert(level(C)), assert(gold(D)), assert(traverse_darkness(E)), assert(traverse_water(F)),
+    assert(traverse_height(G)).
 
 load_binary_misc :- csv_read_file('save/save_binary_misc.txt', X), load_binary_misc_state(X).
 load_binary_misc_state([row(X1, Y1), row(X2, Y2), row(X3, Y3), row(X4, Y4), row(X5, Y5), row(X6, Y6)]) :- 
