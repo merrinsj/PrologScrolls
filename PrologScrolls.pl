@@ -86,7 +86,7 @@ add_gold(I) :- gold(X), NG is X + I, assert(gold(NG)), retract(gold(X)), format(
 
 add_exp(I) :- experience(X), NG is X + I, assert(experience(NG)), retract(experience(X)), format(" you gained : ~w exp!", [NG]), nl.
 
-repair(boat) :- 
+repair_boat :- 
     equipped(utility_slot, hammer), assert(traverse_water(true)), retract(traverse_water(false)),
     write("With the boat repaired, you can now cross the lake. Enter 'n.' to cross."), nl.
 
@@ -342,7 +342,8 @@ load_default_locations :-
     assert(located(battle_axe, shop)),
     assert(located(breastplate, shop)),
     assert(located(fire_wand, shop)),
-    assert(located(quality_cloak, shop)).
+    assert(located(quality_cloak, shop)),
+    assert(located(excalibur, lake_island)).
 
 % add health potions to shop or somewhere else
 
@@ -361,6 +362,7 @@ item(short_sword, weapon_slot, equip_item(attack, 3)).
 item(halberd, weapon_slot, equip_item(attack, 5)).
 item(battle_axe, weapon_slot, equip_item(attack, 7)).
 item(broadsword, weapon_slot, equip_item(attack, 10)).
+item(excalibur, weapon_slot, equip_item(attack, 15)).
 
 %Defense items
 item(chainmail, armor_slot, equip_item(defense, 3)).
@@ -738,6 +740,14 @@ description(lake) :-
     write("In the centre of the lake lies a small island. The water looks dark and sick, due to proximity to the necromancer's tower"), nl,
     write("Beside you lies a boat that has fallen into disrepair. Maybe you could repair it with something?"), nl,
     write("Surrounding you is dense forest, but you can see the tower looming. You can make out a path to the west."), nl.
+
+description(lake_island) :-
+    nl,
+    located(excalibur, lake_island),
+    write("You come ashore on a small island. Quaint and idyllic, it looks almost like its escaped the touch of the necromancer"), nl,
+    write("In the centre of the lake lies a small pedestal. A single ray of light from the dark sky above illuminates the hilt of a sword."), nl,
+    write("A calmness settles upon you."), nl,
+    write("Enter 'take(excalibur)' to take the sword"), nl.
 
 description(dark_forest) :-
     %equipped(magic_slot, spellbook),
