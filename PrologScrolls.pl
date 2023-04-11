@@ -515,7 +515,6 @@ inspect(player) :-
     nl,
     level(L),
     gold(G),
-    experience(E),
     potion_count(health_potion, P),
     equipped(head_slot, X),
     equipped(weapon_slot, Y),
