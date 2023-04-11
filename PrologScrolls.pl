@@ -653,6 +653,12 @@ description(crag) :-
 % West of Crossroads
 description(abandoned_house) :-
     nl,
+    current_character(khajiit),
+    write("Whoever lived in this house has not been here for a long time, they must have been driven out by the necromancer's dark creatures."), nl,
+    write("Their items are strewn about, but there is nothing here of use to you."),
+    write("To the west is a small cemetery covered in fog, and to the east is the crossroads."), nl.
+description(abandoned_house) :-
+    nl,
     located(torch, abandoned_house),
     write("Whoever lived in this house has not been here for a long time, they must have been driven out by the necromancer's dark creatures."), nl,
     write("You spot an open trunk in the corner, with a [torch] and some oil inside. This could allow you to navigate the cave."), nl,
@@ -720,6 +726,11 @@ description(mountain_pass) :-
 
 description(climbers_camp) :-
     nl,
+    current_character(kinko),
+    write("You stand upon a plateau with steep drops on all sides."), nl,
+    write("There are boxes and old tents scattered around that have seen better days, but nothing here is of use to you."), nl.
+description(climbers_camp) :-
+    nl,
     located(rope, climbers_camp),
     write("You stand upon a plateau with steep drops on all sides."), nl,
     write("There are boxes and old tents scattered around that have seen better days. Sitting on one of the boxes is an old [rope]."), nl,
@@ -732,7 +743,6 @@ description(lake) :-
     write("In the centre of the lake lies a small island. The water looks dark and sick, due to proximity to the necromancer's tower"), nl,
     write("Your Argonian physiology would allow you to reach the island. Enter 'n.' to go to the island."), nl,
     write("Surrounding you is dense forest, but you can see the tower looming. You can make out a path to the west."), nl.
-
 description(lake) :-
     equipped(utility_slot, hammer),
     write("You find yourself at the edge of a still lake. Silence permeates the area, but is broken periodically by the cry of a loon."), nl,
