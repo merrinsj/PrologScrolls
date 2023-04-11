@@ -664,13 +664,11 @@ description(crag) :-
 % West of Crossroads
 % If the torch is still in this location, display this description
 description(abandoned_house) :-
-    nl,
     current_character(khajiit),
     write("Whoever lived in this house has not been here for a long time, they must have been driven out by the necromancer's dark creatures."), nl,
     write("Their items are strewn about, but there is nothing here of use to you."),
     write("To the west is a small cemetery covered in fog, and to the east is the crossroads."), nl.
 description(abandoned_house) :-
-    nl,
     located(torch, abandoned_house),
     write("Whoever lived in this house has not been here for a long time, they must have been driven out by the necromancer's dark creatures."), nl,
     write("You spot an open trunk in the corner, with a [torch] and some oil inside. This could allow you to navigate the cave."), nl,
@@ -733,27 +731,22 @@ description(mountain_pass) :-
     write("To the north is a sheer descent to a distant lake. Your kinko wings should be enough to carry you there."), nl,
     write("To the west looks like a climbers camp, and to the east you can make out a shopkeep."), nl.
 description(mountain_pass) :-
-    nl,
     write("You feel a biting chill from the howling wind as you exit the cave onto a frigid mountain pass."), nl,
     write("To the north is a sheer descent to a distant lake. You'll need some equipment to make it down safely"), nl,
     write("To the west looks like a climbers camp. Maybe there is some leftover equipment?"), nl,
     write("To the east you can make out a shopkeep."), nl.
 
 description(climbers_camp) :-
-    nl,
     current_character(kinko),
     write("You stand upon a plateau with steep drops on all sides."), nl,
     write("There are boxes and old tents scattered around that have seen better days, but nothing here is of use to you."), nl.
 description(climbers_camp) :-
-    nl,
     located(rope, climbers_camp),
     write("You stand upon a plateau with steep drops on all sides."), nl,
     write("There are boxes and old tents scattered around that have seen better days. Sitting on one of the boxes is an old [rope]."), nl,
     write("Enter 'take(rope)' to equip the item."), nl,
     write("To the east lies the path forward."), nl.
-
 description(climbers_camp)   :-
-    nl,
     traverse_height(true),
     write("You stand upon a plateau with steep drops on all sides."), nl,
     write("There are boxes and old tents scattered around that have seen better days."), nl,
@@ -773,7 +766,6 @@ description(lake) :-
     write("Beside you lies a boat that has fallen into disrepair. Enter 'repair_boat.' to repair the boat with your hammer."), nl,
     write("Surrounding you is dense forest, but you can see the tower looming. You can make out a path to the west."), nl.
 description(lake) :-
-    nl,
     write("You find yourself at the edge of a still lake. Silence permeates the area, but is broken periodically by the cry of a loon."), nl,
     write("In the centre of the lake lies a small island. The water looks dark and sick, due to proximity to the necromancer's tower"), nl,
     write("Beside you lies a boat that has fallen into disrepair. Maybe you could repair it with something?"), nl,
@@ -788,7 +780,6 @@ description(lake_island) :-
     write("Enter 'take(excalibur)' to take the sword. Enter 's.' to return to the lake side."), nl.
 description(lake_island) :-
     nl,
-    located(excalibur, lake_island),
     write("On this small island, the pedestal is empty. You have already taken excalibur."), nl,
     write("You are ready."), nl.
 
