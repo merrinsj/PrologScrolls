@@ -1,0 +1,6 @@
+player,50
+player,4
+player,4
+player,1
+player,1
+health_potion,0

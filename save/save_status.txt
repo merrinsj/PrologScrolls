@@ -1,0 +1,6 @@
+mudcrab,alive
+ghost,alive
+player,alive
+necromancer,alive
+troll,dead
+skeleton,alive

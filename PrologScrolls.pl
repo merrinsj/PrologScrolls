@@ -912,7 +912,9 @@ Handles saving game state
 save :- current_node_is(battle_dimension), nl, write("Can't save during battles!"), nl, !.
 save :- save_unary_misc, save_binary_misc, save_equipped, save_status, save_located.
 
-save_unary_misc :- current_node_is(X), gold(Y), csv_write_file('save/save_unary_misc.txt', [current_node_is(X), gold(Y)]).
+save_unary_misc :- current_node_is(X), current_character(CC), level(L), 
+    gold(Y), traverse_darkness(TD), traverse_water(TW), traverse_height(TH), 
+    csv_write_file('save/save_unary_misc.txt', [current_node_is(X), current_character(CC), level(L), gold(Y), traverse_darkness(TD), traverse_water(TW), traverse_height(TH)]).
 
 save_binary_misc :- health(player, X), defense(player, Y), attack(player, Z), magic_attack(player, A), magic_defense(player, B), potion_count(health_potion, C),
     csv_write_file('save/save_binary_misc.txt', 
@@ -937,7 +939,9 @@ load_game :- nl, write("Failed to load. Either no save files exist, or you alrea
 fail_load :- nl, play, fail.
 
 load_unary_misc :- csv_read_file('save/save_unary_misc.txt', X), load_unary_misc_state(X).
-load_unary_misc_state([row(X), row(Y)]) :- assert(current_node_is(X)), assert(gold(Y)).
+load_unary_misc_state([row(A), row(B), row(C), row(D), row(E), row(F), row(G)]) :- 
+    assert(current_node_is(A)), assert(current_character(B)), assert(level(C)), assert(gold(D)), assert(traverse_darkness(E)), assert(traverse_water(F)),
+    assert(traverse_height(G)).
 
 load_binary_misc :- csv_read_file('save/save_binary_misc.txt', X), load_binary_misc_state(X).
 load_binary_misc_state([row(X1, Y1), row(X2, Y2), row(X3, Y3), row(X4, Y4), row(X5, Y5), row(X6, Y6)]) :- 
