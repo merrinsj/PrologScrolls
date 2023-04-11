@@ -133,7 +133,9 @@ increase_level :-
     assert(magic_defense(player, NMD)),
 
     retract(magic_attack(player, MA)),
-    assert(magic_attack(player, NMA)).
+    assert(magic_attack(player, NMA)),
+
+    write("Level increased! Plus one to all stats!").
 
 /*
 stats for characters
@@ -143,14 +145,14 @@ stats for characters
 health(mudcrab, 15).
 health(ghost, 15).
 health(necromancer, 50).
-health(troll, 25).
-health(skeleton, 20).
+health(troll, 35).
+health(skeleton, 25).
 
 defense(mudcrab, 1).
 defense(ghost, 100).
-defense(necromancer, 5).
-defense(troll, 3).
-defense(skeleton, 4).
+defense(necromancer, 7).
+defense(troll, 5).
+defense(skeleton, 6).
 
 attack(mudcrab, 1).
 attack(ghost, 0).
@@ -160,13 +162,13 @@ attack(skeleton, 1).
 
 magic_attack(mudcrab, 1).
 magic_attack(ghost, 2).
-magic_attack(necromancer, 5).
+magic_attack(necromancer, 8).
 magic_attack(troll, 0).
-magic_attack(skeleton, 4).
+magic_attack(skeleton, 5).
 
 magic_defense(mudcrab, 1).
 magic_defense(ghost, 1).
-magic_defense(necromancer, 5).
+magic_defense(necromancer, 7).
 magic_defense(troll, 2).
 magic_defense(skeleton, 4).
 
@@ -224,11 +226,13 @@ check_dead(X):- different(X, player), health(X, H), H < 1, status(X, S), assert(
 
 check_dead(_) :- !.
 
-dead_event(mudcrab):- add_potion(health_potion), add_gold(10).
+dead_event(mudcrab):- increase_level, add_potion(health_potion), add_gold(10).
 
-dead_event(ghost):- add_gold(10).
+dead_event(ghost):- increase_level, add_gold(10).
 
-dead_event(troll):- add_potion(health_potion), add_gold(20).
+dead_event(troll):- increase_level, add_potion(health_potion), add_gold(20).
+
+dead_event(skeleton):- increase_level.
 dead_event(_).
 
 battle(X):- current_node_is(PN), status(X, alive), assert(prev_node(PN)), different(battle_dimension, PN),
@@ -407,9 +411,6 @@ n :- move(north).
 e :- move(east).
 s :- move(south).
 w :- move(west).
-%l :- move(west).
-%r :- move(east).
-%f :- move(north).
 
 drink_health_potion:- 
     current_node_is(X), different(battle_dimension, X), potion_count(health_potion, C), C > 0, heal(30), Y is C - 1, 
@@ -444,7 +445,7 @@ uncover :- current_node_is(X), nl, write("found everything of interest.").
 /*
 Handles picking up items.
 */
-take(chest) :- add_gold(50), assert(located(halberd, narnia)), retract(located(halberd, cave)), !.
+take(chest) :- add_gold(50), assert(located(halberd, narnia)), retract(located(halberd, crag)), !.
 take(torch) :- 
     item(torch, Y, S), equipped(Y, I2),
     assert(equipped(Y, torch)), retract(equipped(Y, I2)),
@@ -633,22 +634,18 @@ description(armory) :-
     nl,
     write("There is a field to the south of the now empty armory, and the crossroads are to the west."), nl.
 
-/*
+
 description(mudcrab_field) :-
-    located(halberd, cave),
+    located(halberd, crag),
     nl,
-    write("This field has been infested with mudcrabs since the spread of the necromancer's chaos. You see a cave"), nl,
+    write("This field has been infested with mudcrabs since the spread of the necromancer's chaos. You see a crag"), nl,
     write("to the east of the field's edge, or you can turn back north to the relative safety of the armory."), nl.
-*/
+
 
 description(mudcrab_field) :-
     nl,
     status(mudcrab, dead),
-    write("The cave is too dangerous to return to, the only way out from here is back north to the armory."), nl.
-
-description(mudcrab_field) :-
-    nl,
-    write("This field has been infested with mudcrabs since the spread of the necromancer's chaos."), nl.
+    write("The crag is too dangerous to return to, the only way out from here is back north to the armory."), nl.
 
 description(crag) :-
     nl,
