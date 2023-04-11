@@ -520,7 +520,6 @@ inspect(player) :-
     equipped(armor_slot, Z),
     equipped(magic_slot, M),
     equipped(cape_slot, C),
-    equipped(utility_slot, U),
     health(player, H),
     defense(player, D),
     attack(player, A),
@@ -537,19 +536,17 @@ inspect(player) :-
     format("Cape slot: ~w", [C]), nl,
     format("Weapon slot: ~w", [Y]), nl,
     format("Magic slot: ~w", [M]), nl,
-    format("Utility slot: ~w", [U]), nl,
     format("You currently have ~2f HP, ~w Attack, ~w Defence, ~w Magic Attack and ~w Magic Defence.", [H, A, D, MA, MD]), nl,
     ( TW == true ->
-    format("You can traverse water."), nl
+    format("You can travel across water."), nl
     ; TW == false -> format("")),
     ( TD == true ->
-    format("You can traverse darkness."), nl
+    format("You can see in dark areas."), nl
     ; TD == false -> format("")),
     ( TH == true ->
-    format("You can traverse heights."), nl
+    format("You can scale heights."), nl
     ; TH == false -> format("")),
-    format("You are carrying ~w gold coins and ~w health potion(s).", [G, P]), nl,
-    format("You have ~w experience points.", [E]), nl, !.
+    format("You are carrying ~w gold coins and ~w health potion(s).", [G, P]), nl, !.
 inspect(health_potion) :-
     potion_count(I, C),
     C > 0,
