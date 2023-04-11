@@ -268,6 +268,7 @@ edge(home, north, crossroads).
 
 edge(crossroads, north, cave) :- equipped(weapon_slot, short_sword), equipped(armor_slot, chainmail), traverse_darkness(true).
 edge(crossroads, north, cave) :- equipped(weapon_slot, halberd), equipped(armor_slot, chainmail), traverse_darkness(true).
+edge(crossroads, north, cave) :- traverse_darkness(true), write("It would be suicide to enter the cave wthout armor or weapons!"), nl, !, fail.
 edge(crossroads, north, cave) :- write("It would be suicide to enter the cave wthout armor,weapons or a light source!"), nl, !, fail.
 edge(crossroads, west, abandoned_house).
 edge(crossroads, east, armory).
@@ -495,9 +496,7 @@ buy(quality_cloak) :- gold(X), X > 29, Y is X - 30, assert(gold(Y)), retract(gol
 buy(quality_cloak) :- write("You don't have enough gold!"), nl, fail.
 
 buy(hammer) :- 
-    write("in buy hammer!"), nl, 
-    gold(X), X > 9, Y is X - 10, assert(gold(Y)), retract(gold(X)), 
-    format("gold is ~w", [Y]).
+    gold(X), X > 9, Y is X - 10, assert(gold(Y)), retract(gold(X)).
 buy(hammer) :- write("You don't have enough gold!"), nl, fail.
 
 
@@ -609,9 +608,15 @@ description(home) :-
 
 description(crossroads) :-
     nl,
+    current_character(khajiit),
+    write("You reach the crossroads, from here you can go in any direction."), nl,
+    write("To the north lies a cave, beyond which is the evil necromancer's castle. It is very dark, however your cat-like eyes allow you to pierce the gloom."), nl,
+    write("You can see evidence of a troll. It wouldn't be wise to venture through there unprepared."), nl.
+description(crossroads) :-
+    nl,
     write("You reach the crossroads, from here you can go in any direction."), nl,
     write("To the north lies a cave, beyond which is the evil necromancer's castle. It is very dark, and it would be unwise to venture there unprepared."), nl,
-    write("To the west you see an abandoned house, perhaps the previous tenant left  a torch behind?"), nl,
+    write("To the west you see an abandoned house, perhaps the previous tenant left a torch behind?"), nl,
     write("To the south is your home, but your quest lies ahead of you."), nl,
     write("To the east you see an armory, there might still be supplies inside."), nl.
 
@@ -717,14 +722,18 @@ description(shop) :-
     write("The yordle is nowhere to be seen, so the only thing to do is go back west."), nl.
 
 description(mountain_pass) :-
+    current_character(kinko),
+    write("You feel a biting chill from the howling wind as you exit the cave onto a frigid mountain pass."), nl,
+    write("To the north is a sheer descent to a distant lake. Your kinko wings should be enough to carry you there."), nl,
+    write("To the west looks like a climbers camp, and to the east you can make out a shopkeep."), nl.
+description(mountain_pass) :-
     nl,
-    increase_level, write("Level up! All stats increased by 1!"), nl,
     write("You feel a biting chill from the howling wind as you exit the cave onto a frigid mountain pass."), nl,
     write("To the north is a sheer descent to a distant lake. You'll need some equipment to make it down safely"), nl,
     write("To the west looks like a climbers camp. Maybe there is some leftover equipment?"), nl,
     write("To the east you can make out a shopkeep."), nl.
 
-description(climbers_camp)   :-
+description(climbers_camp) :-
     nl,
     located(rope, climbers_camp),
     write("You stand upon a plateau with steep drops on all sides."), nl,
@@ -741,10 +750,17 @@ description(climbers_camp)   :-
     write("To the east lies the path forward."), nl.
 
 description(lake) :-
+    current_character(argonian),
+    write("You find yourself at the edge of a still lake. Silence permeates the area, but is broken periodically by the cry of a loon."), nl,
+    write("In the centre of the lake lies a small island. The water looks dark and sick, due to proximity to the necromancer's tower"), nl,
+    write("Your Argonian physiology would allow you to reach the island. Enter 'n.' to go to the island."), nl,
+    write("Surrounding you is dense forest, but you can see the tower looming. You can make out a path to the west."), nl.
+
+description(lake) :-
     equipped(utility_slot, hammer),
     write("You find yourself at the edge of a still lake. Silence permeates the area, but is broken periodically by the cry of a loon."), nl,
     write("In the centre of the lake lies a small island. The water looks dark and sick, due to proximity to the necromancer's tower"), nl,
-    write("Beside you lies a boat that has fallen into disrepair. Enter 'repair(boat).' to repair the boat with your hammer."), nl,
+    write("Beside you lies a boat that has fallen into disrepair. Enter 'repair_boat.' to repair the boat with your hammer."), nl,
     write("Surrounding you is dense forest, but you can see the tower looming. You can make out a path to the west."), nl.
 description(lake) :-
     nl,
@@ -756,10 +772,10 @@ description(lake) :-
 description(lake_island) :-
     nl,
     located(excalibur, lake_island),
-    write("You come ashore on a small island. Quaint and idyllic, it looks almost like its escaped the touch of the necromancer"), nl,
+    write("You come ashore on a small island. Quaint and idyllic, it looks almost like it's escaped the touch of the necromancer"), nl,
     write("In the centre of the lake lies a small pedestal. A single ray of light from the dark sky above illuminates the hilt of a sword."), nl,
     write("A calmness settles upon you."), nl,
-    write("Enter 'take(excalibur)' to take the sword"), nl.
+    write("Enter 'take(excalibur)' to take the sword. Enter 's.' to return to the lake side."), nl.
 
 description(dark_forest) :-
     %equipped(magic_slot, spellbook),
