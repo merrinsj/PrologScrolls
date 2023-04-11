@@ -175,7 +175,7 @@ load_default_status :-
     assert(status(ghost, alive)),
     assert(status(player, alive)),
     assert(status(necromancer, alive)),
-    assert(status(troll, dead)),
+    assert(status(troll, alive)),
     assert(status(skeleton, alive)).
 
 /*
@@ -224,11 +224,11 @@ check_dead(X):- different(X, player), health(X, H), H < 1, status(X, S), assert(
 
 check_dead(_) :- !.
 
-dead_event(mudcrab):- add_potion(health_potion), add_gold(10).
+dead_event(mudcrab):- add_potion(health_potion), add_gold(10), description(mudcrab_field).
 
 dead_event(ghost):- add_gold(10).
 
-dead_event(troll):- add_potion(health_potion), add_gold(20).
+dead_event(troll):- add_potion(health_potion), add_gold(20), description(cave).
 dead_event(_).
 
 battle(X):- current_node_is(PN), status(X, alive), assert(prev_node(PN)), different(battle_dimension, PN),
