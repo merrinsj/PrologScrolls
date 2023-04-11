@@ -448,16 +448,19 @@ take(torch) :-
     item(torch, Y, S), equipped(Y, I2),
     assert(equipped(Y, torch)), retract(equipped(Y, I2)),
     assert(traverse_darkness(true)), retract(traverse_darkness(false)), 
+    assert(located(torch,Y)), retract(located(torch,X)),
     write("Item acquired: torch"), !.
 take(rope) :- 
     assert(traverse_height(true)), retract(traverse_height(false)), 
     item(rope, Y, S), equipped(Y, I2),
     assert(equipped(Y, rope)), retract(equipped(Y, I2)),
+    assert(located(rope,Y)), retract(located(rope,X)),
     write("Item acquired: rope"), !.
 take(hammer) :- 
     located(hammer, shop), current_node_is(shop), buy(hammer),
     item(hammer, Y, S), equipped(Y, I2),
     assert(equipped(Y, hammer)), retract(equipped(Y, I2)),
+    assert(located(hammer,Y)), retract(located(hammer,X)),
     write("Item acquired: hammer"), nl, !.
 take(I1) :-
     located(I1, shop), current_node_is(shop), item(I1, Y, S), equipped(Y, I2), different(item(I1, Y, S), item(_,potion,_)),
@@ -654,20 +657,18 @@ description(crag) :-
 
 
 % West of Crossroads
-% First, check if the player has the torch equipped in their utility_slot
-description(abandoned_house) :-
-    located(torch, abandoned_house),
-    equipped(utility_slot, torch),
-    nl,
-    write("Whoever lived in this house has not been here for a long time, they must have been driven out by the necromancer's dark creatures."), nl,
-    write("To the west is a small cemetery covered in fog, and to the east is the crossroads."), nl.
-    
-% If the player does not have the torch equipped, display the default description
+% If the torch is still in this location, display this description
 description(abandoned_house) :-
     located(torch, abandoned_house),
     write("Whoever lived in this house has not been here for a long time, they must have been driven out by the necromancer's dark creatures."), nl,
     write("You spot an open trunk in the corner, with a [torch] and some oil inside. This could allow you to navigate the cave."), nl,
     write("Enter 'take(torch).' to pick up the torch."), nl,
+    write("To the west is a small cemetery covered in fog, and to the east is the crossroads."), nl.
+
+% Display default description
+description(abandoned_house) :-
+    nl,
+    write("Whoever lived in this house has not been here for a long time, they must have been driven out by the necromancer's dark creatures."), nl,
     write("To the west is a small cemetery covered in fog, and to the east is the crossroads."), nl.
 
 description(cemetery) :-
@@ -729,6 +730,14 @@ description(climbers_camp)   :-
     write("You stand upon a plateau with steep drops on all sides."), nl,
     write("There are boxes and old tents scattered around that have seen better days. Sitting on one of the boxes is an old [rope]."), nl,
     write("Enter 'take(rope)' to equip the item."), nl,
+    write("To the east lies the path forward."), nl.
+
+description(climbers_camp)   :-
+    nl,
+    traverse_height(true),
+    write("You stand upon a plateau with steep drops on all sides."), nl,
+    write("There are boxes and old tents scattered around that have seen better days."), nl,
+    write("You've taken everything you can from here."), nl,
     write("To the east lies the path forward."), nl.
 
 description(lake) :-
