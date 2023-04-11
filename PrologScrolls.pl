@@ -696,6 +696,9 @@ description(cave) :-
     write("With the troll dead, you continue to navigate the gloom with your torch held aloft. In the middle of the dark cave, you see a huge, gnarled root with a [magic_staff] carved out of it."), nl,
     write("Enter 'take(magic_staff)' to equip the item."), nl,
     write("To the north you can just see a small light indicating the caves exit."), nl.
+description(cave) :-
+    write("You continue to navigate the dark cave."), nl,
+    write("To the north you can just see a small light indicating the caves exit."), nl.
 
 
 description(shop) :-
