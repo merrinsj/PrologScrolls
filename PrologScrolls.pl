@@ -1,6 +1,6 @@
 :- style_check(-singleton).
 :- dynamic current_node_is/1, equipped/2, located/2, health/2, defense/2, attack/2, magic_attack/2, magic_defense/2, prev_node/1, status/2,
-necromancer_status/2, gold/1, potion_count/2, interactable/2, experience/1, level/1, current_character/1, game_begin/0, traverse_darkness/1, traverse_height/1, traverse_water/1.
+necromancer_status/2, gold/1, potion_count/2, interactable/2, level/1, current_character/1, game_begin/0, traverse_darkness/1, traverse_height/1, traverse_water/1.
 
 
 /*
@@ -79,12 +79,10 @@ load_default_equipment :-
     assert(equipped(cape_slot, nothing)),
     assert(equipped(utility_slot, nothing)),
     assert(potion_count(health_potion, 0)),
-    assert(experience(0)),
     assert(gold(0)).
 
 add_gold(I) :- gold(X), NG is X + I, assert(gold(NG)), retract(gold(X)), format(" gold increased to : ~w", [NG]), nl.
 
-add_exp(I) :- experience(X), NG is X + I, assert(experience(NG)), retract(experience(X)), format(" you gained : ~w exp!", [NG]), nl.
 
 repair_boat :- 
     equipped(utility_slot, hammer), assert(traverse_water(true)), retract(traverse_water(false)),
@@ -226,11 +224,11 @@ check_dead(X):- different(X, player), health(X, H), H < 1, status(X, S), assert(
 
 check_dead(_) :- !.
 
-dead_event(mudcrab):- add_potion(health_potion), add_gold(10), description(mudcrab_field).
+dead_event(mudcrab):- add_potion(health_potion), add_gold(10), description(mudcrab_field), increase_level.
 
 dead_event(ghost):- increase_level, add_gold(10).
 
-dead_event(troll):- add_potion(health_potion), add_gold(20), description(cave).
+dead_event(troll):- add_potion(health_potion), add_gold(20), description(cave), increase_level.
 
 dead_event(skeleton):- increase_level.
 
