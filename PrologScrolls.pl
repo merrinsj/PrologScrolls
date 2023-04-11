@@ -786,6 +786,11 @@ description(lake_island) :-
     write("In the centre of the lake lies a small pedestal. A single ray of light from the dark sky above illuminates the hilt of a sword."), nl,
     write("A calmness settles upon you."), nl,
     write("Enter 'take(excalibur)' to take the sword. Enter 's.' to return to the lake side."), nl.
+description(lake_island) :-
+    nl,
+    located(excalibur, lake_island),
+    write("On this small island, the pedestal is empty. You have already taken excalibur."), nl,
+    write("You are ready."), nl.
 
 description(dark_forest) :-
     %equipped(magic_slot, spellbook),
