@@ -533,7 +533,6 @@ inspect(player) :-
     traverse_water(TW),
     format("Current level: ~w", [L]), nl,
     format("Current Character: ~w", [Character]),nl,
-    format("Head slot: ~w", [X]), nl,
     format("Armor slot: ~w", [Z]), nl,
     format("Cape slot: ~w", [C]), nl,
     format("Weapon slot: ~w", [Y]), nl,
@@ -655,19 +654,25 @@ description(mudcrab_field) :-
     write("This field has been infested with mudcrabs since the spread of the necromancer's chaos. You see a crag"), nl,
     write("to the east of the field's edge, or you can turn back north to the relative safety of the armory."), nl.
 
-
 description(mudcrab_field) :-
     nl,
     status(mudcrab, dead),
     write("The crag is too dangerous to return to, the only way out from here is back north to the armory."), nl.
 
 description(crag) :-
+    located(halberd, narnia),
+    nl,
+    write("You need to run to the west!"), nl. 
+description(crag) :-
+    located(halberd, weapon_slot),
+    nl,
+    write("You need to run to the west!"), nl. 
+description(crag) :-
     nl,
     write("You enter the crag, it is dark but you can see enough to spot two valuable items on the ground."), nl,
     write("A treasure chest and a steel [halberd] lie on opposite sides of the cave's mouth."), nl,
     write("But you hear a deep roar echo from the depths of the cave, there is only time to take one item."), nl,
     write("Enter 'take(chest).' or 'take(halberd).' and then run to the west!"), nl. % Fixed
-
 
 % West of Crossroads
 % If the torch is still in this location, display this description
