@@ -626,14 +626,22 @@ description(armory) :-
     nl,
     write("There is a field to the south of the now empty armory, and the crossroads are to the west."), nl.
 
+/*
 description(mudcrab_field) :-
     located(halberd, cave),
     nl,
     write("This field has been infested with mudcrabs since the spread of the necromancer's chaos. You see a cave"), nl,
     write("to the east of the field's edge, or you can turn back north to the relative safety of the armory."), nl.
+*/
+
 description(mudcrab_field) :-
     nl,
+    status(mudcrab, dead),
     write("The cave is too dangerous to return to, the only way out from here is back north to the armory."), nl.
+
+description(mudcrab_field) :-
+    nl,
+    write("This field has been infested with mudcrabs since the spread of the necromancer's chaos."), nl.
 
 description(crag) :-
     nl,
