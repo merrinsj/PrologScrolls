@@ -632,7 +632,20 @@ description(armory) :-
     write("Enter 'take(short_sword).' to equip the weapon."), nl,
     write("There is a field to the south, and the crossroads are back to the west."), nl.
 description(armory) :-
-    equipped(armor_slot, chainmail),
+    located(short_sword, armory),
+    nl,
+    write("You enter a decrepit old armory, out of the corner of you eye you spot a glint of metal."), nl,
+    write("You discover a [short_sword], this will definitely help you in your fight against the evil necromancer."), nl,
+    write("Enter 'take(short_sword).' to equip the weapon."), nl,
+    write("There is a field to the south, and the crossroads are back to the west."), nl.
+description(armory) :-
+    located(chainmail, armory),
+    nl,
+    write("You enter a decrepit old armory, out of the corner of you eye you spot a glint of metal."), nl,
+    write("You discover [chainmail], this will definitely help you in your fight against the evil necromancer."), nl,
+    write("Enter 'take(chainmail).' to pick up the armor."), nl,
+    write("There is a field to the south, and the crossroads are back to the west."), nl.
+description(armory) :-
     nl,
     write("There is a field to the south of the now empty armory, and the crossroads are to the west."), nl.
 
