@@ -1,0 +1,6 @@
+head_slot,nothing
+magic_slot,nothing
+cape_slot,nothing
+utility_slot,nothing
+armor_slot,chainmail
+weapon_slot,short_sword

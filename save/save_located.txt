@@ -1,0 +1,17 @@
+torch,abandoned_house
+rope,climbers_camp
+hammer,shop
+halberd,crag
+spellbook,wasteland
+pristine_cloak,wasteland
+frost_wand,cemetery
+rugged_cloak,cemetery
+magic_staff,cave
+broadsword,shop
+battle_axe,shop
+breastplate,shop
+fire_wand,shop
+quality_cloak,shop
+excalibur,lake_island
+chainmail,armor_slot
+short_sword,weapon_slot
