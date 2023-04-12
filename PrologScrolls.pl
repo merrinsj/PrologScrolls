@@ -1,3 +1,7 @@
+/* Built off code from
+https://github.com/Jasonsd19/Prolog-Text-Based-RPG-CPSC-312
+*/
+
 :- style_check(-singleton).
 :- dynamic current_node_is/1, equipped/2, located/2, health/2, defense/2, attack/2, magic_attack/2, magic_defense/2, prev_node/1, status/2,
 necromancer_status/2, gold/1, potion_count/2, interactable/2, level/1, current_character/1, game_begin/0, traverse_darkness/1, traverse_height/1, traverse_water/1.
